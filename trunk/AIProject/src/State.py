@@ -12,6 +12,5 @@ class State(object):
         self.path = tuple() 
 
 
-first_instance =State()
-print first_instance.orintation
+
 
