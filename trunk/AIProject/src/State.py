@@ -9,7 +9,7 @@ class State(object):
         self.orintation = "f"
         self.cell = tuple()
         self.holding_gold = False
-        self.path = tuple() 
+        self.path = tuple(self.cell) 
 
 
 
