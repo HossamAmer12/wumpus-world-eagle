@@ -1,5 +1,7 @@
 
 
+import Node
+
 EGALE=1
 AGENT=0
 
@@ -52,13 +54,38 @@ def agent_step(observation):
 
 def getCellsNeededForDiscovery(nodes):
     #to Do but return should be like that
-    
-    I=[]
+    cell = nodes.cell
+    x = cell[0]
+    y = cell[1]
+    if x > 0 and y > 0 and x < 11 and y < 11:
+        I = [4, x + 1, y, x - 1, y, x, y + 1, x, y - 1] 
+    elif x == 0 and y > 0 and y < 11:
+        I = [3, x+1 , y , x, y + 1, x , y - 1]
+    elif y == 0 and x > 0 and y < 11:
+        I = [3 , x + 1, y, x - 1, y ,x, y + 1]
+    elif y == 11 and x < 11 and x > 0:
+        I = [3 , x + 1, y , x - 1 , y , x , y - 1] 
+    elif x == 11 and y < 11 and y > 0:
+        I = [3, x - 1, y , x, y + 1,x, y - 1]
+    elif x == 0 and y == 0:
+        I = [2, x + 1, y, x , y + 1]
+    elif x == 11 and y == 11:
+        I = [2 , x - 1, y, x, y - 1]
+    elif x == 0 and y == 11:
+        I = [2, x+ 1,y, x, y -1]
+    else: 
+        I = [2, x - 1,y , x, y + 1]
+  
     return (['q'],I)
         
         
 def getSuccessorStates(StateNode):
-    #To Do
+    
+  
+    
+    
+    
+    
     return []
     
         
