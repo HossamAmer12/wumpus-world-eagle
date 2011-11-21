@@ -5,11 +5,14 @@ Created on Nov 19, 2011
 '''
 class State(object):
     
-    def __init__(self, initial_balance=0):
-        self.orintation = "f"
-        self.cell = tuple()
-        self.holding_gold = False
-        self.path = tuple(self.cell) 
+    def __init__(self,hasArrow = True , orintation = 'N', position = (0,0), holding_gold = False, killedWampus = False, path = []):
+        self.orintation = orintation
+        self.position = position
+        self.holding_gold = holding_gold
+        self.path = path.append(position)
+        self.killedWampus = killedWampus
+        self.hasArrow = hasArrow
+
 
 
 
