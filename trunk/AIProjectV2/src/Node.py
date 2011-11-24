@@ -22,12 +22,13 @@ class Node:
         return  'State: ' + str(self.state) + ', PathCost: ' + str(self.pathCost) + ', Action: ' + str(self.action) + ', ActionPath: ' + str(self.actionPath) + ', Observation: ' + str(self.observation)
   
   
-    def  __cmp__(self, other):
-        if self.pathCost < other.pathCost:
-            return -1
-        elif self.pathCost == other.pathCost:
-            return 0; 
-        else:
-            return 1;   
+#    def  __cmp__(self, other):
+#        if self.pathCost < other.pathCost:
+#            return -1
+#        elif self.pathCost == other.pathCost:
+#            return 0; 
+#        else:
+#            return 1;   
 
-
+#http://brandon.sternefamily.net/files/astar.txt
+#http://brandon.sternefamily.net/posts/2005/02/a-star-algorithm-in-python/
