@@ -29,7 +29,6 @@ from State import State
 import numpy as np
 
 
-from random import Random
 
 
 
@@ -40,7 +39,8 @@ class skeleton_agent(Agent):
 	
 	def agent_init(self, taskSpec):
 		#See the sample_sarsa_agent in the mines-sarsa-example project for how to parse the task spec
-		
+		self.WIDTH=3
+		self.HEIGHT=3
 		self.EAGLE = 1
 		self.AGENT = 0
 		
@@ -53,8 +53,8 @@ class skeleton_agent(Agent):
 		self.strategyIndex = -1
 		self.pathToGoal = []
 		self.pathToGoalIndex = -1
-		self.visited=np.ndarray(shape=(3,3,4,2,2), dtype=np.bool)
-		self.visited.fill(False)
+		self.visited=np.ndarray(shape=(self.WIDTH,self.HEIGHT,4,2,2), dtype=np.bool)
+		
 		#print self.visited
 		
 	def agent_start(self, observation):
@@ -65,20 +65,15 @@ class skeleton_agent(Agent):
 		action.charArray.append('q')
 		#action.intArray=[9,0,0,0,1,0,2,1,0,1,1,1,2,2,0,2,1,2,2]
 		action.intArray=[1,0,0]
-		'''
-		action2 = Action()
-		action2.charArray.append('r')
-		action2.intArray=[1,0,0]
-		print action2
-		'''
+	
 		
-		state=State()
 		initPartialNode = Node()
 		self.strategyIndex += 1
 		self.partialStateNodes = [initPartialNode]
 		self.q = []
 		self.agenda = self.EAGLE
-		self.pathToGoalIndex +=1 
+		self.pathToGoalIndex =-1 
+		self.visited.fill(False)
 		#print 'End the method start'
 		return action
 		
@@ -111,6 +106,7 @@ class skeleton_agent(Agent):
 				return lastAction
 			
 			first = self.q.pop(0)
+			#print first
 			#print first
 			orient = ['N', 'E', 'S', 'W']
 			OrienTindex = orient.index(first.state.orintation)
@@ -161,7 +157,6 @@ class skeleton_agent(Agent):
 
 		validPosition, newPosition = self.newPosition(node.state.position, node.state.orintation)
 		action = Action()
-		#action.intArray = I.insert(0,len(I)/2)
 		action.intArray = [1,newPosition[0],newPosition[1]]
 		action.charArray.append('q')
 		return action
@@ -225,7 +220,7 @@ class skeleton_agent(Agent):
 		index = orient.index(orintation)
 		shifts = [ 0, 1,1, 0, 0, -1, -1, 0]
 				
-		if -1 < position[0] + shifts[index * 2] < 3 and - 1 < position[1] + shifts[index * 2 + 1] < 3:
+		if -1 < position[0] + shifts[index * 2] < self.WIDTH and - 1 < position[1] + shifts[index * 2 + 1] < self.HEIGHT:
 			position = (position[0] + shifts[index * 2], position[1] + shifts[index * 2 + 1])
 			return True, position
 		else:
@@ -246,6 +241,7 @@ class skeleton_agent(Agent):
 	
 	def createPathToGoal(self, node):
 		#ToDO
+		node.actionPath.pop(0)
 		node.actionPath.append('c')
 		return node.actionPath
 	
@@ -295,6 +291,9 @@ class skeleton_agent(Agent):
 			que.extend(listOfNodes)
 		elif self.strategyIndex == 1: #DFS
 			map(lambda x: que.insert(0, x), listOfNodes)
+			#print que
+			#print len(que)
+			#print que
 		return que
 	
 	def goal(self, node):
