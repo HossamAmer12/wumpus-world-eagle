@@ -20,7 +20,7 @@ class Node:
       
     def __str__(self):
         return  'State: ' + str(self.state) + ', PathCost: ' + str(self.pathCost) + ', Action: ' + str(self.action) + ', ActionPath: ' + str(self.actionPath) + ', Observation: ' + str(self.observation)
-  
+
   
 #    def  __cmp__(self, other):
 #        if self.pathCost < other.pathCost:
@@ -29,6 +29,11 @@ class Node:
 #            return 0; 
 #        else:
 #            return 1;   
+'''
+small Node I think this to work 100% correct like in java it simply can be
+return self.pathCost - other.pathCost; and that is set
 
+'''
 #http://brandon.sternefamily.net/files/astar.txt
 #http://brandon.sternefamily.net/posts/2005/02/a-star-algorithm-in-python/
+
