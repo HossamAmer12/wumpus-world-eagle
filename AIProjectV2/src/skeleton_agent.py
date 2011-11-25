@@ -109,12 +109,7 @@ class skeleton_agent(Agent):
 			
 			first = self.q.pop(0)
 			#print first
-			#print first
-			orient = ['N', 'E', 'S', 'W']
-			OrienTindex = orient.index(first.state.orintation)
-			holdingGold = 1 if first.state.holdingGold else 0
-			wumposKilled = 1 if first.state.killedWampus else 0
-			self.visited[first.state.position[0], first.state.position[1], OrienTindex, holdingGold, wumposKilled] = True
+			self.setVisited(first)
 			#print 'current', first
 			if self.goal(first):
 				self.pathToGoal = self.createPathToGoal(first)
@@ -243,15 +238,8 @@ class skeleton_agent(Agent):
 		invalidNodes = []
 		observation = observations.intArray
 		for node in partialNodes:
-			holdingGold = 1 if node.state.holdingGold else 0
-			orient = ['N', 'E', 'S', 'W']
-			OrienTindex = orient.index(node.state.orintation)
-			holdingGold = 1 if node.state.holdingGold else 0
-			wumposKilled = 1 if node.state.killedWampus else 0
-			#print self.visited[node.state.position[0],node.state.position[1],OrienTindex,holdingGold]
-			if self.visited[node.state.position[0], node.state.position[1], OrienTindex, holdingGold, wumposKilled ]:
+			if self.isVisted(node):
 				invalidNodes.append(node)
-				#print 'invalidated'
 				continue
 			if node.action == 'f':
 				if observation[1] == 1 or (observation[2] == 1 and not (node.state.killedWampus)):
@@ -266,16 +254,25 @@ class skeleton_agent(Agent):
 						
 			if node.action == '.':
 				node.observation = observation
-				
-			
-			
-		#print 'invalid'
-		#print map(str, invalidNodes)	
-		map(partialNodes.remove, invalidNodes)
-		#print len(partialNodes)		
-		
+	
+		map(partialNodes.remove, invalidNodes)		
 		return partialNodes
 	
+	
+	def setVisited(self,node):
+		orient = ['N', 'E', 'S', 'W']
+		OrienTindex = orient.index(node.state.orintation)
+		holdingGold = 1 if node.state.holdingGold else 0
+		wampusKilled = 1 if node.state.killedWampus else 0
+		self.visited[node.state.position[0], node.state.position[1], OrienTindex, holdingGold, wampusKilled ]=True
+		
+	def isVisted(self,node):
+		orient = ['N', 'E', 'S', 'W']
+		OrienTindex = orient.index(node.state.orintation)
+		holdingGold = 1 if node.state.holdingGold else 0
+		wampusKilled = 1 if node.state.killedWampus else 0
+		return self.visited[node.state.position[0], node.state.position[1], OrienTindex, holdingGold, wampusKilled ]
+
 	def add_node(self, node, priority=0):
 		
 		entry = [priority, node]
@@ -284,12 +281,13 @@ class skeleton_agent(Agent):
 	def list_reconstruct(self):
 		que=[]
 		for i  in range( len(self.heapQueue)):
-			num, x = hp.heappop(self.heapQueue)
+			x = hp.heappop(self.heapQueue)[1]
 			que.append(x)
 		return que
 			
 	
 	def enqueue(self, que, listOfNodes):
+		map(self.setVisited,listOfNodes)
 		# insert according to the strategy
 		if self.strategyIndex == 0: #BFS
 			que.extend(listOfNodes)
