@@ -8,6 +8,16 @@ from State import State
 class Node:
     pass
    
+    def heuristicValue(self):
+        if(self.state.holdingGold):
+            x = self.state.position[0]
+            y = self.state.position[1]
+            val = x + y
+            return val
+        else:
+            return 0
+        
+   
     def __init__(self, action='.', state=None , pathCost=0, actionPath=[], observation=None):
         self.state = State() if state == None else state 
         self.pathCost = 0
@@ -16,6 +26,7 @@ class Node:
         self.actionPath.extend(actionPath)
         self.actionPath.append(action)
         self.observation = observation
+        self.heuristic = self.heuristicValue()
         
       
     def __str__(self):
