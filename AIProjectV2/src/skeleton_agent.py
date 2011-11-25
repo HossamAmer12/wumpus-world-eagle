@@ -20,8 +20,8 @@
 from rlglue.agent.Agent import Agent
 from rlglue.agent import AgentLoader as AgentLoader
 from rlglue.types import Action
-from rlglue.types import Observation
-from  math import sqrt,ceil
+
+
 
 
 
@@ -168,22 +168,13 @@ class skeleton_agent(Agent):
 
 		oldState = parentNode.state
 		tempNodes = []
-		'''
-		# validating Action c
-		if oldState.position == (0, 0) and oldState.holdingGold:
-			newState = State( oldState.orintation, oldState.position, oldState.holdingGold, oldState.killedWampus, oldState.path)
-			newNode = Node('c', newState, parentNode.pathCost + self.actionCost('c'), parentNode.actionPath,parentNode.observation)
-			newNode.actionPath.append('x')
-			tempNodes.append(newNode)
-			return tempNodes
-		'''
+
 		# validating Action g
 		if parentNode.observation[0] == 1 and not oldState.holdingGold:
 			newState = State(oldState.orintation, oldState.position, True, oldState.killedWampus, oldState.path)
 			newNode = Node('g', newState, parentNode.pathCost + self.actionCost('g'), parentNode.actionPath, parentNode.observation)
 			tempNodes.append(newNode)
 			return tempNodes
-		
 		
 			
 		# validating Action f
@@ -192,7 +183,6 @@ class skeleton_agent(Agent):
 			newState = State(oldState.orintation, newPosition, oldState.holdingGold, oldState.killedWampus, oldState.path)
 			newNode = Node('f', newState, parentNode.pathCost + self.actionCost('f'), parentNode.actionPath)
 			tempNodes.append(newNode)
-
 
 		# validating Action r
 		newOrientation = self.newOrintation(oldState.orintation, 'r')
