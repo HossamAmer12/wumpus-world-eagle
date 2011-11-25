@@ -29,7 +29,7 @@ from State import State
 import numpy as np
 
 
-
+import heapq as hp
 
 
 
@@ -39,8 +39,8 @@ class skeleton_agent(Agent):
 	
 	def agent_init(self, taskSpec):
 		#See the sample_sarsa_agent in the mines-sarsa-example project for how to parse the task spec
-		self.WIDTH=3
-		self.HEIGHT=3
+		self.WIDTH = 3
+		self.HEIGHT = 3
 		self.EAGLE = 1
 		self.AGENT = 0
 		
@@ -53,8 +53,9 @@ class skeleton_agent(Agent):
 		self.strategyIndex = -1
 		self.pathToGoal = []
 		self.pathToGoalIndex = -1
-		self.visited=np.ndarray(shape=(self.WIDTH,self.HEIGHT,4,2,2), dtype=np.bool)
+		self.visited = np.ndarray(shape=(self.WIDTH, self.HEIGHT, 4, 2, 2), dtype=np.bool)
 		
+		self.heapQueue = []
 		#print self.visited
 		
 	def agent_start(self, observation):
@@ -64,7 +65,7 @@ class skeleton_agent(Agent):
 		action = Action()
 		action.charArray.append('q')
 		#action.intArray=[9,0,0,0,1,0,2,1,0,1,1,1,2,2,0,2,1,2,2]
-		action.intArray=[1,0,0]
+		action.intArray = [1, 0, 0]
 	
 		
 		initPartialNode = Node()
@@ -72,7 +73,7 @@ class skeleton_agent(Agent):
 		self.partialStateNodes = [initPartialNode]
 		self.q = []
 		self.agenda = self.EAGLE
-		self.pathToGoalIndex =-1 
+		self.pathToGoalIndex = -1 
 		self.visited.fill(False)
 		#print 'End the method start'
 		return action
@@ -102,7 +103,7 @@ class skeleton_agent(Agent):
 				print 'fail'
 				lastAction.intArray = []
 				lastAction.charArray.append('x')
-				lastAction.intArray=[]
+				lastAction.intArray = []
 				return lastAction
 			
 			first = self.q.pop(0)
@@ -110,9 +111,9 @@ class skeleton_agent(Agent):
 			#print first
 			orient = ['N', 'E', 'S', 'W']
 			OrienTindex = orient.index(first.state.orintation)
-			holdingGold= 1 if first.state.holdingGold else 0
-			wumposKilled=1 if first.state.killedWampus else 0
-			self.visited[first.state.position[0],first.state.position[1],OrienTindex,holdingGold,wumposKilled]=True
+			holdingGold = 1 if first.state.holdingGold else 0
+			wumposKilled = 1 if first.state.killedWampus else 0
+			self.visited[first.state.position[0], first.state.position[1], OrienTindex, holdingGold, wumposKilled] = True
 			#print 'current', first
 			if self.goal(first):
 				self.pathToGoal = self.createPathToGoal(first)
@@ -120,7 +121,7 @@ class skeleton_agent(Agent):
 				print self.pathToGoal
 				
 				lastAction.charArray.append('.')
-				lastAction.intArray=[]
+				lastAction.intArray = []
 				return lastAction
 			
 			
@@ -132,10 +133,10 @@ class skeleton_agent(Agent):
 			return self.getCellsNeededForDiscovery(first) 
 			
 		if self.agenda == self.AGENT:
-			self.pathToGoalIndex = self.pathToGoalIndex +1
+			self.pathToGoalIndex = self.pathToGoalIndex + 1
 			#print self.pathToGoal[self.pathToGoalIndex]
 			lastAction.charArray.append(self.pathToGoal[self.pathToGoalIndex])
-			lastAction.intArray=[]
+			lastAction.intArray = []
 			return lastAction
 
 		
@@ -157,7 +158,7 @@ class skeleton_agent(Agent):
 
 		validPosition, newPosition = self.newPosition(node.state.position, node.state.orintation)
 		action = Action()
-		action.intArray = [1,newPosition[0],newPosition[1]]
+		action.intArray = [1, newPosition[0], newPosition[1]]
 		action.charArray.append('q')
 		return action
 
@@ -177,8 +178,8 @@ class skeleton_agent(Agent):
 		'''
 		# validating Action g
 		if parentNode.observation[0] == 1 and not oldState.holdingGold:
-			newState = State( oldState.orintation, oldState.position, True, oldState.killedWampus, oldState.path)
-			newNode = Node('g', newState, parentNode.pathCost + self.actionCost('g'), parentNode.actionPath,parentNode.observation)
+			newState = State(oldState.orintation, oldState.position, True, oldState.killedWampus, oldState.path)
+			newNode = Node('g', newState, parentNode.pathCost + self.actionCost('g'), parentNode.actionPath, parentNode.observation)
 			tempNodes.append(newNode)
 			return tempNodes
 		
@@ -187,28 +188,28 @@ class skeleton_agent(Agent):
 		# validating Action f
 		validPosition, newPosition = self.newPosition(parentNode.state.position, parentNode.state.orintation)
 		if validPosition:
-			newState = State( oldState.orintation, newPosition, oldState.holdingGold, oldState.killedWampus, oldState.path)
+			newState = State(oldState.orintation, newPosition, oldState.holdingGold, oldState.killedWampus, oldState.path)
 			newNode = Node('f', newState, parentNode.pathCost + self.actionCost('f'), parentNode.actionPath)
 			tempNodes.append(newNode)
 
 
 		# validating Action r
 		newOrientation = self.newOrintation(oldState.orintation, 'r')
-		newState = State( newOrientation, oldState.position, oldState.holdingGold, oldState.killedWampus, oldState.path)
-		newNode = Node('r', newState, parentNode.pathCost + self.actionCost('r'), parentNode.actionPath,parentNode.observation)
+		newState = State(newOrientation, oldState.position, oldState.holdingGold, oldState.killedWampus, oldState.path)
+		newNode = Node('r', newState, parentNode.pathCost + self.actionCost('r'), parentNode.actionPath, parentNode.observation)
 		tempNodes.append(newNode)
 	
 		# validating Action l
 		newOrientation = self.newOrintation(oldState.orintation, 'l')
-		newState = State( newOrientation, oldState.position, oldState.holdingGold, oldState.killedWampus, oldState.path)
-		newNode = Node('l', newState, parentNode.pathCost + self.actionCost('l'), parentNode.actionPath,parentNode.observation)
+		newState = State(newOrientation, oldState.position, oldState.holdingGold, oldState.killedWampus, oldState.path)
+		newNode = Node('l', newState, parentNode.pathCost + self.actionCost('l'), parentNode.actionPath, parentNode.observation)
 		tempNodes.append(newNode)
 		
 		# validating Action a
 		if not oldState.killedWampus:
 			#print '* create'
-			newState = State( oldState.orintation, oldState.position, oldState.holdingGold, True, oldState.path)
-			newNode = Node('a', newState, parentNode.pathCost + self.actionCost('a'), parentNode.actionPath,parentNode.observation)
+			newState = State(oldState.orintation, oldState.position, oldState.holdingGold, True, oldState.path)
+			newNode = Node('a', newState, parentNode.pathCost + self.actionCost('a'), parentNode.actionPath, parentNode.observation)
 			tempNodes.append(newNode)
 
 		
@@ -218,9 +219,9 @@ class skeleton_agent(Agent):
 	def newPosition(self, position, orintation):
 		orient = ['N', 'E', 'S', 'W']
 		index = orient.index(orintation)
-		shifts = [ 0, 1,1, 0, 0, -1, -1, 0]
+		shifts = [ 0, 1, 1, 0, 0, -1, -1, 0]
 				
-		if -1 < position[0] + shifts[index * 2] < self.WIDTH and - 1 < position[1] + shifts[index * 2 + 1] < self.HEIGHT:
+		if -1 < position[0] + shifts[index * 2] < self.WIDTH and -1 < position[1] + shifts[index * 2 + 1] < self.HEIGHT:
 			position = (position[0] + shifts[index * 2], position[1] + shifts[index * 2 + 1])
 			return True, position
 		else:
@@ -248,27 +249,27 @@ class skeleton_agent(Agent):
 	
 	def updateWorkingNodeSet(self, partialNodes, observations):
 		#print len(partialNodes),		
-		invalidNodes=[]
-		observation=observations.intArray
+		invalidNodes = []
+		observation = observations.intArray
 		for node in partialNodes:
-			holdingGold= 1 if node.state.holdingGold else 0
+			holdingGold = 1 if node.state.holdingGold else 0
 			orient = ['N', 'E', 'S', 'W']
 			OrienTindex = orient.index(node.state.orintation)
-			holdingGold= 1 if node.state.holdingGold else 0
-			wumposKilled=1 if node.state.killedWampus else 0
+			holdingGold = 1 if node.state.holdingGold else 0
+			wumposKilled = 1 if node.state.killedWampus else 0
 			#print self.visited[node.state.position[0],node.state.position[1],OrienTindex,holdingGold]
-			if self.visited[node.state.position[0],node.state.position[1],OrienTindex,holdingGold,wumposKilled ]:
+			if self.visited[node.state.position[0], node.state.position[1], OrienTindex, holdingGold, wumposKilled ]:
 				invalidNodes.append(node)
 				#print 'invalidated'
 				continue
-			if node.action=='f':
-				if observation[1] == 1 or (observation[2]==1 and not (node.state.killedWampus)):
+			if node.action == 'f':
+				if observation[1] == 1 or (observation[2] == 1 and not (node.state.killedWampus)):
 					invalidNodes.append(node)
 				else:
 					node.observation = observation
 				
 			if node.action == 'a':
-				if observation[2]==0 or observation[1]==1:
+				if observation[2] == 0 or observation[1] == 1:
 						invalidNodes.append(node)
 						#print '* Invalid'
 						
@@ -279,11 +280,23 @@ class skeleton_agent(Agent):
 			
 		#print 'invalid'
 		#print map(str, invalidNodes)	
-		map(partialNodes.remove,invalidNodes)
+		map(partialNodes.remove, invalidNodes)
 		#print len(partialNodes)		
 		
 		return partialNodes
 	
+	def add_node(self, node, priority=0):
+		
+		entry = [priority, node]
+		hp.heappush(self.heapQueue, entry)
+	
+	def list_reconstruct(self, que):
+		
+		for i in range (len(self.heapQueue)):
+			num, x = hp.heappop(self.heapQueue)
+			que.append(x)
+		return que
+			
 	
 	def enqueue(self, que, listOfNodes):
 		# insert according to the strategy
@@ -294,6 +307,14 @@ class skeleton_agent(Agent):
 			#print que
 			#print len(que)
 			#print que
+		elif self.strategyIndex == 2: #UCS
+			map(lambda x: self.add_node(x, x.pathCost), que)
+			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)
+			que = []
+			que = self.list_reconstruct(que)
+          	
+#          	for y in que:
+#          		print 'UCS: ', y
 		return que
 	
 	def goal(self, node):
