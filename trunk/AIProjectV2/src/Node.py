@@ -9,18 +9,17 @@ class Node:
     pass
    
     def heuristicValue(self):
-        if(self.state.holdingGold):
+        if self.state.holdingGold:
             x = self.state.position[0]
             y = self.state.position[1]
-            val = x + y
-            return val
+            return  x + y
         else:
             return 0
         
    
     def __init__(self, action='.', state=None , pathCost=0, actionPath=[], observation=None):
         self.state = State() if state == None else state 
-        self.pathCost = 0
+        self.pathCost = pathCost
         self.action = action
         self.actionPath = []
         self.actionPath.extend(actionPath)

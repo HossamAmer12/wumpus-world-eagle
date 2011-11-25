@@ -21,6 +21,7 @@ from rlglue.agent.Agent import Agent
 from rlglue.agent import AgentLoader as AgentLoader
 from rlglue.types import Action
 from rlglue.types import Observation
+from  math import sqrt,ceil
 
 
 
@@ -98,7 +99,7 @@ class skeleton_agent(Agent):
 			#print  map(str,self.successorStates)
 			
 			self.q = self.enqueue(self.q, self.successorStates)
-			
+			#print map(str,self.q)
 			if self.q == []:
 				print 'fail'
 				lastAction.intArray = []
@@ -290,9 +291,9 @@ class skeleton_agent(Agent):
 		entry = [priority, node]
 		hp.heappush(self.heapQueue, entry)
 	
-	def list_reconstruct(self, que):
-		
-		for i in range (len(self.heapQueue)):
+	def list_reconstruct(self):
+		que=[]
+		for i  in range( len(self.heapQueue)):
 			num, x = hp.heappop(self.heapQueue)
 			que.append(x)
 		return que
@@ -309,14 +310,20 @@ class skeleton_agent(Agent):
 			#print que
 		elif self.strategyIndex == 2: #UCS
 			map(lambda x: self.add_node(x, x.pathCost), que)
-			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)
-			que = []
-			que = self.list_reconstruct(que)
-          	
+			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)	
+			que = self.list_reconstruct()
+		
+		elif self.strategyIndex == 3:# A*
+			map(lambda x: self.add_node(x, x.pathCost+x.heuristic), que)
+			map(lambda x: self.add_node(x, x.pathCost+x.heuristic) , listOfNodes)
+			que = self.list_reconstruct()
 #          	for y in que:
 #          		print 'UCS: ', y
 		return que
 	
+	
+		
+		
 	def goal(self, node):
 		if node.state.position == (0, 0) and node.state.holdingGold :
 			return True
