@@ -40,8 +40,8 @@ class skeleton_agent(Agent):
 	
 	def agent_init(self, taskSpec):
 		#See the sample_sarsa_agent in the mines-sarsa-example project for how to parse the task spec
-		self.WIDTH = 3
-		self.HEIGHT = 3
+		self.WIDTH = 12
+		self.HEIGHT = 12
 		self.EAGLE = 1
 		self.AGENT = 0
 		
