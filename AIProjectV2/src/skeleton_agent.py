@@ -62,6 +62,7 @@ class skeleton_agent(Agent):
 		
 		self.heapQueue = []
 		self.iteration=0
+		self.depthq=[]
 		#print self.visited
 		
 	def agent_start(self, observation):
@@ -82,6 +83,7 @@ class skeleton_agent(Agent):
 		self.agenda = self.EAGLE
 		self.pathToGoalIndex = -1 
 		self.visited.fill(False)
+		self.depthq=[]
 		#print 'End the method start'
 		return action
 		
@@ -102,7 +104,9 @@ class skeleton_agent(Agent):
 			
 			
 			#hashas	
+			
 			self.enqueue(self.successorStates)
+			
 			
 #			print 'Heap Queue: ', len(self.heapQueue) 
 			
@@ -110,7 +114,7 @@ class skeleton_agent(Agent):
 			if len(self.heapQueue) == 0:
 				if self.strategyIndex==2 and self.iteration <= self.MAX_DEPTH:
 					self.iteration+=1
-					print 'i',self.iteration
+					#print 'i',self.iteration
 					action = Action()
 					action.charArray.append('q')
 					action.intArray = [1, 0, 0]
@@ -131,14 +135,16 @@ class skeleton_agent(Agent):
 			#hashas
 			first = hp.heappop(self.heapQueue)[1]
 			
-			#print first
+			self.depthq.append(first.depth)
+		
+			
 			self.setVisited(first)
 			#print 'current', first
 			if self.goal(first):
 				self.pathToGoal = self.createPathToGoal(first)
 				self.agenda = self.AGENT
 				print self.pathToGoal
-				
+				print max(self.depthq)
 				lastAction.charArray.append('.')
 				lastAction.intArray = []
 				return lastAction
@@ -183,17 +189,17 @@ class skeleton_agent(Agent):
 
 
 	def getSuccessorStates(self, parentNode):
-		print 'parentNode', parentNode.depth
+		#print 'parentNode', parentNode.depth
 		oldState = parentNode.state
 		tempNodes = []
-
+		
 		# validating Action g
 		if parentNode.observation[0] == 1 and not oldState.holdingGold:
-			newState = State(oldState.orintation, oldState.position, True, oldState.killedWampus, oldState.path)
+			newState = State(oldState.orintation, oldState.position, True, oldState.killedWampus)
 			
 			#hashas
-			newCost  =  parentNode.pathCost + self.actionCost('g')* (-1 if 1<=self.strategyIndex <= 2  else 1)
-			newNode = Node('g', newState, newCost, parentNode.actionPath, parentNode.observation, parentNode.depth)
+			newCost  =  parentNode.pathCost + self.actionCost('g')
+			newNode = Node('g', newState, newCost, parentNode.actionPath, parentNode.observation,parentNode.depth)
 			
 			tempNodes.append(newNode)
 			return tempNodes
@@ -202,9 +208,9 @@ class skeleton_agent(Agent):
 		# validating Action f
 		validPosition, newPosition = self.newPosition(parentNode.state.position, parentNode.state.orintation)
 		if validPosition:
-			newState = State(oldState.orintation, newPosition, oldState.holdingGold, oldState.killedWampus, oldState.path)
+			newState = State(oldState.orintation, newPosition, oldState.holdingGold, oldState.killedWampus)
 			#hashas
-			newCost  =  parentNode.pathCost + self.actionCost('f')* (-1 if 1<=self.strategyIndex <= 2  else 1)
+			newCost  =  parentNode.pathCost + self.actionCost('f')
 			newNode = Node('f', newState, newCost, parentNode.actionPath, parentNode.depth)
 			
 #			newNode = Node('f', newState, parentNode.pathCost + self.actionCost('f'), parentNode.actionPath)
@@ -212,22 +218,22 @@ class skeleton_agent(Agent):
 
 		# validating Action r
 		newOrientation = self.newOrintation(oldState.orintation, 'r')
-		newState = State(newOrientation, oldState.position, oldState.holdingGold, oldState.killedWampus, oldState.path)
+		newState = State(newOrientation, oldState.position, oldState.holdingGold, oldState.killedWampus)
 		
 		#hashas
-		newCost  =  parentNode.pathCost + self.actionCost('r')* (-1 if 1<=self.strategyIndex <= 2  else 1)
-		newNode = Node('r', newState, newCost, parentNode.actionPath, parentNode.observation, parentNode.depth)
+		newCost  =  parentNode.pathCost + self.actionCost('r')
+		newNode = Node('r', newState, newCost, parentNode.actionPath, parentNode.observation,parentNode.depth)
 		
 #		newNode = Node('r', newState, parentNode.pathCost + self.actionCost('r'), parentNode.actionPath, parentNode.observation)
 		tempNodes.append(newNode)
 	
 		# validating Action l
 		newOrientation = self.newOrintation(oldState.orintation, 'l')
-		newState = State(newOrientation, oldState.position, oldState.holdingGold, oldState.killedWampus, oldState.path)
+		newState = State(newOrientation, oldState.position, oldState.holdingGold, oldState.killedWampus)
 		
 		#hashas
-		newCost  =  parentNode.pathCost + self.actionCost('l')* (-1 if 1<=self.strategyIndex <= 2  else 1)
-		newNode = Node('l', newState, newCost, parentNode.actionPath, parentNode.observation, parentNode.depth)
+		newCost  =  parentNode.pathCost + self.actionCost('l')
+		newNode = Node('l', newState, newCost, parentNode.actionPath, parentNode.observation,parentNode.depth)
 		
 #		newNode = Node('l', newState, parentNode.pathCost + self.actionCost('l'), parentNode.actionPath, parentNode.observation)
 		tempNodes.append(newNode)
@@ -235,17 +241,15 @@ class skeleton_agent(Agent):
 		# validating Action a
 		if not oldState.killedWampus:
 			#print '* create'
-			newState = State(oldState.orintation, oldState.position, oldState.holdingGold, True, oldState.path)
+			newState = State(oldState.orintation, oldState.position, oldState.holdingGold, True)
 			
 			#hashas
-			newCost  =  parentNode.pathCost + self.actionCost('a')* (-1 if 1<=self.strategyIndex <= 2 else 1)
+			newCost  =  parentNode.pathCost + self.actionCost('a')
 			newNode = Node('a', newState, newCost, parentNode.actionPath, parentNode.observation, parentNode.depth)
 			
 			#newNode = Node('a', newState, parentNode.pathCost + self.actionCost('a'), parentNode.actionPath, parentNode.observation)
 			tempNodes.append(newNode)
-
-		
-		
+					
 		return tempNodes
 	
 	def newPosition(self, position, orintation):
@@ -281,7 +285,9 @@ class skeleton_agent(Agent):
 	
 	def updateWorkingNodeSet(self, partialNodes, observations):
 		#print len(partialNodes),	
+		
 		if self.strategyIndex==2 and len(partialNodes)>0  and partialNodes[0].depth>=self.iteration :
+			#print partialNodes[0].depth
 			return []
 			
 		invalidNodes = []
@@ -346,11 +352,11 @@ class skeleton_agent(Agent):
 			
 		elif self.strategyIndex == 1: #DFS
 			
-			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)
+			map(lambda x: self.add_node(x, x.pathCost*-1), listOfNodes)
 		
 		elif self.strategyIndex == 2: #ID
 			
-			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)
+			map(lambda x: self.add_node(x, x.pathCost*-1), listOfNodes)
 			
 		elif self.strategyIndex == 3: #UCS
 			
