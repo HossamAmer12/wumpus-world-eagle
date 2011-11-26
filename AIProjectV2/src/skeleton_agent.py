@@ -30,7 +30,7 @@ from State import State
 import numpy as np
 
 
-import heapq as hp
+import Queue
 
 
 
@@ -46,9 +46,7 @@ class skeleton_agent(Agent):
 		self.HEIGHT = 12
 		self.EAGLE = 1
 		self.AGENT = 0
-		self.MAX_DEPTH=self.WIDTH*self.HEIGHT
-		
-		
+		self.MAX_DEPTH=self.WIDTH*self.HEIGHT*10
 		self.agenda = self.AGENT
 		self.successoStates = []
 		self.partialStateNodes = []
@@ -60,10 +58,10 @@ class skeleton_agent(Agent):
 		self.pathToGoalIndex = -1
 		self.visited = np.ndarray(shape=(self.WIDTH, self.HEIGHT, 4, 2, 2), dtype=np.bool)
 		
-		self.heapQueue = []
 		self.iteration=0
+		
 		self.depthq=[]
-		#print self.visited
+		
 		
 	def agent_start(self, observation):
 		#Generate random action, 0 or 1
@@ -71,69 +69,60 @@ class skeleton_agent(Agent):
 		action = Action()
 		action.charArray.append('q')
 		action.intArray = [1, 0, 0]
-	
+		
 		self.strategyIndex += 1
 		
 		initPartialNode = Node()
 		self.partialStateNodes = [initPartialNode]
 		
-		#hashas
-		self.heapQueue = []
+		#Initialize data structure
+		if self.strategyIndex ==0: #BFS
+			self.heapQueue = Queue.Queue()
+		elif self.strategyIndex == 1 or self.strategyIndex == 2: #DFS , ID
+			self.heapQueue = Queue.LifoQueue()
+		elif self.strategyIndex == 3 or self.strategyIndex == 4: #UCS, A* 
+			self.heapQueue = Queue.PriorityQueue()
+			
 		
 		self.agenda = self.EAGLE
 		self.pathToGoalIndex = -1 
 		self.visited.fill(False)
 		self.depthq=[]
-		#print 'End the method start'
 		return action
 		
 
 
 	
 	def agent_step(self, reward, observation):
-		#Generate random action, 0 or 1
-		#global successorStates, agenda, q, pathToGoal, partialStateNodes, pathToGoalIndex, AGENT, EAGLE
-		#print str(observation.intArray)
-		
-		lastAction = Action()
-		
-		#print 'Start the method step'
-		
+		action = Action()
+			
 		if self.agenda == self.EAGLE:
 			self.successorStates = self.updateWorkingNodeSet(self.partialStateNodes, observation)
 			
-			
-			#hashas	
-			
 			self.enqueue(self.successorStates)
-			
-			
-#			print 'Heap Queue: ', len(self.heapQueue) 
-			
-			#hashas
-			if len(self.heapQueue) == 0:
+		
+			if self.heapQueue.empty():
 				if self.strategyIndex==2 and self.iteration <= self.MAX_DEPTH:
 					self.iteration+=1
-					#print 'i',self.iteration
-					action = Action()
 					action.charArray.append('q')
 					action.intArray = [1, 0, 0]
 					initPartialNode = Node()
 					self.partialStateNodes = [initPartialNode]
-					self.heapQueue = []
+					self.heapQueue = Queue.LifoQueue()
 					self.visited.fill(False)
 					return action
 				
 				
 				print 'fail'
-				lastAction.intArray = []
-				lastAction.charArray.append('x')
-				lastAction.intArray = []
-				return lastAction
+				action.intArray = []
+				action.charArray.append('x')
+				action.intArray = []
+				return action
 		
 
 			#hashas
-			first = hp.heappop(self.heapQueue)[1]
+			#first = hp.heappop(self.heapQueue)[1]
+			first=self.heapQueue.get()[1]
 			
 			self.depthq.append(first.depth)
 		
@@ -143,11 +132,12 @@ class skeleton_agent(Agent):
 			if self.goal(first):
 				self.pathToGoal = self.createPathToGoal(first)
 				self.agenda = self.AGENT
-				print self.pathToGoal
+				print 'len',len(self.pathToGoal),self.pathToGoal
+				
 				print max(self.depthq)
-				lastAction.charArray.append('.')
-				lastAction.intArray = []
-				return lastAction
+				action.charArray.append('.')
+				action.intArray = []
+				return action
 			
 			
 			self.partialStateNodes = self.getSuccessorStates(first)
@@ -160,9 +150,9 @@ class skeleton_agent(Agent):
 		if self.agenda == self.AGENT:
 			self.pathToGoalIndex = self.pathToGoalIndex + 1
 			#print self.pathToGoal[self.pathToGoalIndex]
-			lastAction.charArray.append(self.pathToGoal[self.pathToGoalIndex])
-			lastAction.intArray = []
-			return lastAction
+			action.charArray.append(self.pathToGoal[self.pathToGoalIndex])
+			action.intArray = []
+			return action
 
 		
 	
@@ -190,6 +180,9 @@ class skeleton_agent(Agent):
 
 	def getSuccessorStates(self, parentNode):
 		#print 'parentNode', parentNode.depth
+		if self.strategyIndex==2 and parentNode.depth==self.iteration :
+			return []
+		
 		oldState = parentNode.state
 		tempNodes = []
 		
@@ -286,9 +279,6 @@ class skeleton_agent(Agent):
 	def updateWorkingNodeSet(self, partialNodes, observations):
 		#print len(partialNodes),	
 		
-		if self.strategyIndex==2 and len(partialNodes)>0  and partialNodes[0].depth>=self.iteration :
-			#print partialNodes[0].depth
-			return []
 			
 		invalidNodes = []
 		observation = observations.intArray
@@ -329,48 +319,41 @@ class skeleton_agent(Agent):
 		return self.visited[node.state.position[0], node.state.position[1], OrienTindex, holdingGold, wampusKilled ]
 
 	def add_node(self, node, priority=0):
-		
 #		print 'Node: ', node
-		entry = [priority, node]
-		hp.heappush(self.heapQueue, entry)
+		entry = (priority, node)
+		#hp.heappush(self.heapQueue, entry)
+		self.heapQueue.put(entry)
 	
 
 			
 	def enqueue(self, listOfNodes):
-		
-		# Marking the visited nodes
-		map(self.setVisited,listOfNodes)
-		
-		
+			
 		# insert according to the strategy
 		if self.strategyIndex == 0: #BFS
-
-			#hashas
+			# mark nodes as visited
+			map(self.setVisited,listOfNodes)
 			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)
 			
-#			que.extend(listOfNodes)
-			
 		elif self.strategyIndex == 1: #DFS
-			
+			# mark nodes as visited
+			map(self.setVisited,listOfNodes)
 			map(lambda x: self.add_node(x, x.pathCost*-1), listOfNodes)
 		
 		elif self.strategyIndex == 2: #ID
-			
+			# mark nodes as visited
+			map(self.setVisited,listOfNodes)
 			map(lambda x: self.add_node(x, x.pathCost*-1), listOfNodes)
 			
 		elif self.strategyIndex == 3: #UCS
-			
 			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)
 		
 		elif self.strategyIndex == 4:# A*
-			
 			map(lambda x: self.add_node(x, x.pathCost+x.heuristic), listOfNodes)
 		
 		
 		
 	def goal(self, node):
 		if node.state.position == (0, 0) and node.state.holdingGold :
-			print 'dep',node.depth,
 			return True
 		else:
 			return False
