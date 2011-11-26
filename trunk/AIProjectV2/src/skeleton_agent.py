@@ -1,3 +1,10 @@
+'''
+
+Hossam Amer
+Taher Galal
+Mohamed Gad
+'''
+
 
 from rlglue.agent.Agent import Agent
 from rlglue.agent import AgentLoader as AgentLoader
@@ -6,6 +13,7 @@ from Node import Node
 from State import State
 import numpy as np
 import Queue
+import time
 
 
 class skeleton_agent(Agent):
@@ -59,6 +67,7 @@ class skeleton_agent(Agent):
 		self.depthq=[]
 		# to measure performance
 		self.numExpandedNodes=0
+		self.startTime=time.time()
 		#print 'End the method start'
 		return action
 		
@@ -101,6 +110,7 @@ class skeleton_agent(Agent):
 					return action
 				# if not ID 
 				print 'fail'
+				print 'ellapsed time:', time.time()-self.startTime,'s'
 				action.intArray = []
 				action.charArray.append('x')
 				action.intArray = []
@@ -118,6 +128,7 @@ class skeleton_agent(Agent):
 				self.agenda = self.AGENT
 				print self.pathToGoal,'number of steps',len(self.pathToGoal)
 				print 'number of expanded nodes:',self.numExpandedNodes
+				print 'ellapsed time:', time.time()-self.startTime,'s'
 				#print max(self.depthq)
 				action.charArray.append('.')
 				action.intArray = []
@@ -353,7 +364,7 @@ class skeleton_agent(Agent):
 
 	
 	def agent_end(self, reward):
-		pass
+		print reward
 	
 	def agent_cleanup(self):
 		pass
