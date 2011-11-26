@@ -5,6 +5,12 @@ Created on Nov 19, 2011
 '''
 class State:
     pass
+    '''
+        orientation
+        position
+        holdingGold
+        KilledWumpus
+    '''
     
     def __init__(self, orintation = 'N', position = (0,0), holdingGold = False, killedWampus = False):
         self.orintation = orintation
