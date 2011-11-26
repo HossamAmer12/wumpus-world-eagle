@@ -17,7 +17,7 @@ class Node:
             return 0
         
    
-    def __init__(self, action='.', state=None , pathCost=0, actionPath=[], observation=None):
+    def __init__(self, action='.', state=None , pathCost=0, actionPath=[], observation=None,oldDepth=-1):
         self.state = State() if state == None else state 
         self.pathCost = pathCost
         self.action = action
@@ -26,6 +26,7 @@ class Node:
         self.actionPath.append(action)
         self.observation = observation
         self.heuristic = self.heuristicValue()
+        self.depth=oldDepth+1
         
       
     def __str__(self):

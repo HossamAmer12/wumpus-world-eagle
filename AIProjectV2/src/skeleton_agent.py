@@ -35,6 +35,7 @@ import heapq as hp
 
 
 
+
 class skeleton_agent(Agent):
 	
 	
@@ -45,35 +46,35 @@ class skeleton_agent(Agent):
 		self.HEIGHT = 12
 		self.EAGLE = 1
 		self.AGENT = 0
+		self.MAX_DEPTH=self.WIDTH*self.HEIGHT
+		
 		
 		self.agenda = self.AGENT
 		self.successoStates = []
 		self.partialStateNodes = []
-		self.q = []
+		
 		#self.actions = ['f', 'l', 'r', 'c', 'g', 'a']
-		self.strategies = ['BFS', 'DFS']
+		self.strategies = ['BFS', 'DFS','ID','UCS','A*']
 		self.strategyIndex = -1
 		self.pathToGoal = []
 		self.pathToGoalIndex = -1
 		self.visited = np.ndarray(shape=(self.WIDTH, self.HEIGHT, 4, 2, 2), dtype=np.bool)
 		
 		self.heapQueue = []
+		self.iteration=0
 		#print self.visited
 		
 	def agent_start(self, observation):
 		#Generate random action, 0 or 1
-		#print 'Start the method start'
-		#global strategyIndex, partialStateNodes, q, agenda, pathToGoalIndex, EAGLE
+	
 		action = Action()
 		action.charArray.append('q')
-		#action.intArray=[9,0,0,0,1,0,2,1,0,1,1,1,2,2,0,2,1,2,2]
 		action.intArray = [1, 0, 0]
 	
+		self.strategyIndex += 1
 		
 		initPartialNode = Node()
-		self.strategyIndex += 1
 		self.partialStateNodes = [initPartialNode]
-		self.q = []	
 		
 		#hashas
 		self.heapQueue = []
@@ -100,11 +101,6 @@ class skeleton_agent(Agent):
 			self.successorStates = self.updateWorkingNodeSet(self.partialStateNodes, observation)
 			
 			
-#			print 'Successor states: '
-#			print  map(str,self.successorStates)
-			
-#			self.q = self.enqueue(self.q, self.successorStates)
-
 			#hashas	
 			self.enqueue(self.successorStates)
 			
@@ -112,23 +108,26 @@ class skeleton_agent(Agent):
 			
 			#hashas
 			if len(self.heapQueue) == 0:
+				if self.strategyIndex==2 and self.iteration <= self.MAX_DEPTH:
+					self.iteration+=1
+					print 'i',self.iteration
+					action = Action()
+					action.charArray.append('q')
+					action.intArray = [1, 0, 0]
+					initPartialNode = Node()
+					self.partialStateNodes = [initPartialNode]
+					self.heapQueue = []
+					self.visited.fill(False)
+					return action
+				
+				
 				print 'fail'
 				lastAction.intArray = []
 				lastAction.charArray.append('x')
 				lastAction.intArray = []
 				return lastAction
-			
-			#print map(str,self.q)
-#			if self.q == []:
-#				print 'fail'
-#				lastAction.intArray = []
-#				lastAction.charArray.append('x')
-#				lastAction.intArray = []
-#				return lastAction
-			
-					
-#			first = self.q.pop(0)
-			
+		
+
 			#hashas
 			first = hp.heappop(self.heapQueue)[1]
 			
@@ -184,7 +183,7 @@ class skeleton_agent(Agent):
 
 
 	def getSuccessorStates(self, parentNode):
-
+		print 'parentNode', parentNode.depth
 		oldState = parentNode.state
 		tempNodes = []
 
@@ -193,8 +192,8 @@ class skeleton_agent(Agent):
 			newState = State(oldState.orintation, oldState.position, True, oldState.killedWampus, oldState.path)
 			
 			#hashas
-			newCost  =  parentNode.pathCost + self.actionCost('g')* (-1 if self.strategyIndex == 1 else 1)
-			newNode = Node('g', newState, newCost, parentNode.actionPath, parentNode.observation)
+			newCost  =  parentNode.pathCost + self.actionCost('g')* (-1 if 1<=self.strategyIndex <= 2  else 1)
+			newNode = Node('g', newState, newCost, parentNode.actionPath, parentNode.observation, parentNode.depth)
 			
 			tempNodes.append(newNode)
 			return tempNodes
@@ -205,8 +204,8 @@ class skeleton_agent(Agent):
 		if validPosition:
 			newState = State(oldState.orintation, newPosition, oldState.holdingGold, oldState.killedWampus, oldState.path)
 			#hashas
-			newCost  =  parentNode.pathCost + self.actionCost('f')* (-1 if self.strategyIndex == 1 else 1)
-			newNode = Node('f', newState, newCost, parentNode.actionPath)
+			newCost  =  parentNode.pathCost + self.actionCost('f')* (-1 if 1<=self.strategyIndex <= 2  else 1)
+			newNode = Node('f', newState, newCost, parentNode.actionPath, parentNode.depth)
 			
 #			newNode = Node('f', newState, parentNode.pathCost + self.actionCost('f'), parentNode.actionPath)
 			tempNodes.append(newNode)
@@ -216,8 +215,8 @@ class skeleton_agent(Agent):
 		newState = State(newOrientation, oldState.position, oldState.holdingGold, oldState.killedWampus, oldState.path)
 		
 		#hashas
-		newCost  =  parentNode.pathCost + self.actionCost('r')* (-1 if self.strategyIndex == 1 else 1)
-		newNode = Node('r', newState, newCost, parentNode.actionPath, parentNode.observation)
+		newCost  =  parentNode.pathCost + self.actionCost('r')* (-1 if 1<=self.strategyIndex <= 2  else 1)
+		newNode = Node('r', newState, newCost, parentNode.actionPath, parentNode.observation, parentNode.depth)
 		
 #		newNode = Node('r', newState, parentNode.pathCost + self.actionCost('r'), parentNode.actionPath, parentNode.observation)
 		tempNodes.append(newNode)
@@ -227,8 +226,8 @@ class skeleton_agent(Agent):
 		newState = State(newOrientation, oldState.position, oldState.holdingGold, oldState.killedWampus, oldState.path)
 		
 		#hashas
-		newCost  =  parentNode.pathCost + self.actionCost('l')* (-1 if self.strategyIndex == 1 else 1)
-		newNode = Node('l', newState, newCost, parentNode.actionPath, parentNode.observation)
+		newCost  =  parentNode.pathCost + self.actionCost('l')* (-1 if 1<=self.strategyIndex <= 2  else 1)
+		newNode = Node('l', newState, newCost, parentNode.actionPath, parentNode.observation, parentNode.depth)
 		
 #		newNode = Node('l', newState, parentNode.pathCost + self.actionCost('l'), parentNode.actionPath, parentNode.observation)
 		tempNodes.append(newNode)
@@ -239,8 +238,8 @@ class skeleton_agent(Agent):
 			newState = State(oldState.orintation, oldState.position, oldState.holdingGold, True, oldState.path)
 			
 			#hashas
-			newCost  =  parentNode.pathCost + self.actionCost('a')* (-1 if self.strategyIndex == 1 else 1)
-			newNode = Node('a', newState, newCost, parentNode.actionPath, parentNode.observation)
+			newCost  =  parentNode.pathCost + self.actionCost('a')* (-1 if 1<=self.strategyIndex <= 2 else 1)
+			newNode = Node('a', newState, newCost, parentNode.actionPath, parentNode.observation, parentNode.depth)
 			
 			#newNode = Node('a', newState, parentNode.pathCost + self.actionCost('a'), parentNode.actionPath, parentNode.observation)
 			tempNodes.append(newNode)
@@ -281,7 +280,10 @@ class skeleton_agent(Agent):
 	
 	
 	def updateWorkingNodeSet(self, partialNodes, observations):
-		#print len(partialNodes),		
+		#print len(partialNodes),	
+		if self.strategyIndex==2 and len(partialNodes)>0  and partialNodes[0].depth>=self.iteration :
+			return []
+			
 		invalidNodes = []
 		observation = observations.intArray
 		for node in partialNodes:
@@ -345,12 +347,16 @@ class skeleton_agent(Agent):
 		elif self.strategyIndex == 1: #DFS
 			
 			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)
+		
+		elif self.strategyIndex == 2: #ID
 			
-		elif self.strategyIndex == 2: #UCS
+			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)
+			
+		elif self.strategyIndex == 3: #UCS
 			
 			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)
 		
-		elif self.strategyIndex == 3:# A*
+		elif self.strategyIndex == 4:# A*
 			
 			map(lambda x: self.add_node(x, x.pathCost+x.heuristic), listOfNodes)
 		
@@ -358,6 +364,7 @@ class skeleton_agent(Agent):
 		
 	def goal(self, node):
 		if node.state.position == (0, 0) and node.state.holdingGold :
+			print 'dep',node.depth,
 			return True
 		else:
 			return False
