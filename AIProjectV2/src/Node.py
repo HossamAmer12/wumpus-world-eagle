@@ -7,6 +7,7 @@ from State import State
 
 class Node:
     pass
+    count=0
    
     def heuristicValue(self):
         if self.state.holdingGold:
@@ -17,7 +18,7 @@ class Node:
             return 0
         
    
-    def __init__(self, action='.', state=None , pathCost=0, actionPath=[], observation=None,oldDepth=-1):
+    def __init__(self,action='.', state=None , pathCost=0, actionPath=[], observation=None,oldDepth=-1):
         self.state = State() if state == None else state 
         self.pathCost = pathCost
         self.action = action
@@ -27,11 +28,14 @@ class Node:
         self.observation = observation
         self.heuristic = self.heuristicValue()
         self.depth=len(self.actionPath)-1
+        self.id=Node.count
+        Node.count+=1 
         
       
     def __str__(self):
-        return 'depth:'+str(self.depth)
-        #return  'State: ' + str(self.state) + ', PathCost: ' + str(self.pathCost) + ', Action: ' + str(self.action) + ', ActionPath: ' + str(self.actionPath) + ', Observation: ' + str(self.observation)
+        #return 'depth:'+str(self.depth)
+        #return 'id '+str(self.id)+' cost '+str(self.pathCost)
+        return  'id ' +str(self.id)+', state '+str(self.state)+ ', PathCost: ' + str(self.pathCost) + ', Action: ' + str(self.action) #+ ', ActionPath: ' + str(self.actionPath) + ', Observation: ' + str(self.observation)
 
   
 #    def  __cmp__(self, other):

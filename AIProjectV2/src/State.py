@@ -13,7 +13,7 @@ class State:
         self.killedWampus = killedWampus
 
     def __str__(self):
-        return  '' + str(self.orintation)+ ', ' + str(self.position)+ ', '+ str(self.holdingGold)+ ', ' + str(self.path)+ ', '+ str(self.killedWampus)
+        return  '' + str(self.orintation)+ ', ' + str(self.position)+ ', '+ str(self.holdingGold)+ ', '+ str(self.killedWampus)
 
 
 

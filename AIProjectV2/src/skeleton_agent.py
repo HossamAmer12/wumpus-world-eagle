@@ -42,11 +42,13 @@ class skeleton_agent(Agent):
 	
 	def agent_init(self, taskSpec):
 		#See the sample_sarsa_agent in the mines-sarsa-example project for how to parse the task spec
-		self.WIDTH = 12
-		self.HEIGHT = 12
+		self.WIDTH = 3
+		self.HEIGHT = 3
 		self.EAGLE = 1
 		self.AGENT = 0
 		self.MAX_DEPTH=self.WIDTH*self.HEIGHT*10
+		
+		
 		self.agenda = self.AGENT
 		self.successoStates = []
 		self.partialStateNodes = []
@@ -61,7 +63,7 @@ class skeleton_agent(Agent):
 		self.iteration=0
 		
 		self.depthq=[]
-		
+		#print self.visited
 		
 	def agent_start(self, observation):
 		#Generate random action, 0 or 1
@@ -69,13 +71,12 @@ class skeleton_agent(Agent):
 		action = Action()
 		action.charArray.append('q')
 		action.intArray = [1, 0, 0]
-		
+	
 		self.strategyIndex += 1
-		
 		initPartialNode = Node()
 		self.partialStateNodes = [initPartialNode]
 		
-		#Initialize data structure
+		#hashas
 		if self.strategyIndex ==0: #BFS
 			self.heapQueue = Queue.Queue()
 		elif self.strategyIndex == 1 or self.strategyIndex == 2: #DFS , ID
@@ -88,22 +89,65 @@ class skeleton_agent(Agent):
 		self.pathToGoalIndex = -1 
 		self.visited.fill(False)
 		self.depthq=[]
+		#print 'End the method start'
 		return action
 		
+	def newQueu(self):
+		if self.strategyIndex ==0: #BFS
+			self.heapQueue = Queue.Queue()
+		elif self.strategyIndex == 1 or self.strategyIndex == 2: #DFS , ID
+			self.heapQueue = Queue.LifoQueue()
+		elif self.strategyIndex == 3 or self.strategyIndex == 4: #UCS, A* 
+			self.heapQueue = Queue.PriorityQueue()
 
-
+	def printQue(self):
+		if self.strategyIndex ==0: #BFS
+			h = Queue.Queue()
+		elif self.strategyIndex == 1 or self.strategyIndex == 2: #DFS , ID
+			h = Queue.LifoQueue()
+		elif self.strategyIndex == 3 or self.strategyIndex == 4: #UCS, A* 
+			h = Queue.PriorityQueue()
+		
+		while not self.heapQueue.empty():
+			temp= self.heapQueue.get()
+			h.put(temp)
+			print temp[1],
+		print 
+		
+		while not h.empty():
+			self.heapQueue.put( h.get())
+		
 	
 	def agent_step(self, reward, observation):
-		action = Action()
-			
+		#Generate random action, 0 or 1
+		#global successorStates, agenda, q, pathToGoal, partialStateNodes, pathToGoalIndex, AGENT, EAGLE
+		#print str(observation.intArray)
+		
+		lastAction = Action()
+		
+		
+		
+		#print 'Start the method step'
+		
 		if self.agenda == self.EAGLE:
 			self.successorStates = self.updateWorkingNodeSet(self.partialStateNodes, observation)
 			
+			
+			#hashas	
+			
 			self.enqueue(self.successorStates)
-		
+			#self.printQue()
+			
+			
+#			print 'Heap Queue: ', len(self.heapQueue) 
+			
 			if self.heapQueue.empty():
+			#hashas
+			#if len(self.heapQueue) == 0:
 				if self.strategyIndex==2 and self.iteration <= self.MAX_DEPTH:
 					self.iteration+=1
+					#print 'i',self.iteration
+					action = Action()
 					action.charArray.append('q')
 					action.intArray = [1, 0, 0]
 					initPartialNode = Node()
@@ -114,10 +158,10 @@ class skeleton_agent(Agent):
 				
 				
 				print 'fail'
-				action.intArray = []
-				action.charArray.append('x')
-				action.intArray = []
-				return action
+				lastAction.intArray = []
+				lastAction.charArray.append('x')
+				lastAction.intArray = []
+				return lastAction
 		
 
 			#hashas
@@ -126,18 +170,21 @@ class skeleton_agent(Agent):
 			
 			self.depthq.append(first.depth)
 		
+			#hashas now
 			
 			self.setVisited(first)
 			#print 'current', first
+			#if first.state.holdingGold:
+				
 			if self.goal(first):
 				self.pathToGoal = self.createPathToGoal(first)
 				self.agenda = self.AGENT
 				print 'len',len(self.pathToGoal),self.pathToGoal
 				
 				print max(self.depthq)
-				action.charArray.append('.')
-				action.intArray = []
-				return action
+				lastAction.charArray.append('.')
+				lastAction.intArray = []
+				return lastAction
 			
 			
 			self.partialStateNodes = self.getSuccessorStates(first)
@@ -150,9 +197,9 @@ class skeleton_agent(Agent):
 		if self.agenda == self.AGENT:
 			self.pathToGoalIndex = self.pathToGoalIndex + 1
 			#print self.pathToGoal[self.pathToGoalIndex]
-			action.charArray.append(self.pathToGoal[self.pathToGoalIndex])
-			action.intArray = []
-			return action
+			lastAction.charArray.append(self.pathToGoal[self.pathToGoalIndex])
+			lastAction.intArray = []
+			return lastAction
 
 		
 	
@@ -334,26 +381,30 @@ class skeleton_agent(Agent):
 			map(self.setVisited,listOfNodes)
 			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)
 			
+			
 		elif self.strategyIndex == 1: #DFS
 			# mark nodes as visited
 			map(self.setVisited,listOfNodes)
-			map(lambda x: self.add_node(x, x.pathCost*-1), listOfNodes)
+			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)
 		
 		elif self.strategyIndex == 2: #ID
 			# mark nodes as visited
-			map(self.setVisited,listOfNodes)
-			map(lambda x: self.add_node(x, x.pathCost*-1), listOfNodes)
+			#map(self.setVisited,listOfNodes)
+			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)
 			
 		elif self.strategyIndex == 3: #UCS
+			
 			map(lambda x: self.add_node(x, x.pathCost), listOfNodes)
 		
 		elif self.strategyIndex == 4:# A*
+			 
 			map(lambda x: self.add_node(x, x.pathCost+x.heuristic), listOfNodes)
 		
 		
 		
 	def goal(self, node):
 		if node.state.position == (0, 0) and node.state.holdingGold :
+			print 'dep',node.depth,
 			return True
 		else:
 			return False
