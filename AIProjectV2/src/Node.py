@@ -30,7 +30,7 @@ class Node:
             return 1
         
    
-    def __init__(self,action='.', state=None , pathCost=0, actionPath=[], observation=None):
+    def __init__(self,action='.', state=None , pathCost=0, actionPath=[], observation=None,parentNodeIn=None):
         self.state = State() if state == None else state 
         self.pathCost = pathCost
         self.action = action
@@ -42,6 +42,7 @@ class Node:
         self.depth=len(self.actionPath)-1
         self.id=Node.count
         Node.count+=1 
+        self.parentNode=parentNodeIn
         
       
     def __str__(self):
