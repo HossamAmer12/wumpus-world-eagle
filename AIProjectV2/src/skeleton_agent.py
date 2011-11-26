@@ -35,6 +35,7 @@ class skeleton_agent(Agent):
 		# for debug
 		self.depthq=[]
 		
+		
 	def agent_start(self, observation):
 		'''
 		initialize the episode strategy
@@ -56,8 +57,11 @@ class skeleton_agent(Agent):
 		self.pathToGoalIndex = -1 
 		self.visited.fill(False)
 		self.depthq=[]
+		# to measure performance
+		self.numExpandedNodes=0
 		#print 'End the method start'
 		return action
+		
 		
 	def newQueu(self):
 		'''
@@ -71,8 +75,6 @@ class skeleton_agent(Agent):
 			self.heapQueue = Queue.PriorityQueue()
 
 		
-		
-	
 	def agent_step(self, reward, observation):
 		'''
 		called by the rl-glue 
@@ -106,6 +108,7 @@ class skeleton_agent(Agent):
 		
 			#Get first element from list
 			first=self.heapQueue.get()[1]
+			self.numExpandedNodes+=1
 			#for debug
 			self.depthq.append(first.depth)
 			self.setVisited(first)
@@ -114,6 +117,7 @@ class skeleton_agent(Agent):
 				self.pathToGoal = self.createPathToGoal(first)
 				self.agenda = self.AGENT
 				print self.pathToGoal,'number of steps',len(self.pathToGoal)
+				print 'number of expanded nodes:',self.numExpandedNodes
 				#print max(self.depthq)
 				action.charArray.append('.')
 				action.intArray = []
@@ -227,7 +231,10 @@ class skeleton_agent(Agent):
 		'''
 		cost of actions 
 		'''
-		return 1
+		if action == 'a':
+			return 10
+		else:
+			return 1
 
 	
 	def createPathToGoal(self, node):

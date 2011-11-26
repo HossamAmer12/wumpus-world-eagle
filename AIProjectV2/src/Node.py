@@ -27,7 +27,7 @@ class Node:
             y = self.state.position[1]
             return  x + y
         else:
-            return 0
+            return 1
         
    
     def __init__(self,action='.', state=None , pathCost=0, actionPath=[], observation=None):
