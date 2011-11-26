@@ -26,11 +26,12 @@ class Node:
         self.actionPath.append(action)
         self.observation = observation
         self.heuristic = self.heuristicValue()
-        self.depth=oldDepth+1
+        self.depth=len(self.actionPath)-1
         
       
     def __str__(self):
-        return  'State: ' + str(self.state) + ', PathCost: ' + str(self.pathCost) + ', Action: ' + str(self.action) + ', ActionPath: ' + str(self.actionPath) + ', Observation: ' + str(self.observation)
+        return 'depth:'+str(self.depth)
+        #return  'State: ' + str(self.state) + ', PathCost: ' + str(self.pathCost) + ', Action: ' + str(self.action) + ', ActionPath: ' + str(self.actionPath) + ', Observation: ' + str(self.observation)
 
   
 #    def  __cmp__(self, other):
