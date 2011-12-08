@@ -2,7 +2,7 @@
 
 import re
 from utils import *
-from _threading_local import local
+
 
 
 class Expr:
@@ -197,11 +197,6 @@ def unify_var(var, x, s):
     else:
         return extend(s, var, x)
 
-def substitue (x, s):
-    return substitueHelper(x, s, {});
-    
-def substitueHelper (x, s, result):
-    return 12;
 
 
  
@@ -225,29 +220,40 @@ def extend(s, var, val):
     {y: 2, x: 1}
     """
     s2 = s.copy()
-    s2[var] = val
+    # substitute the variables in val with the values from s2
+    t= subst(val,s2)
+    # check if any substitution leads to a loop 
+#    for sub in s2:
+#        if occur_check(var, s2[sub]):
+#            if occur_check(sub, val):
+#                return None
+    #insert t in s2
+    s2[var] = t
+    # fixing vlues of dict according to added sub
+    s2=dict(map(lambda ex: (ex,subst(s2[ex],s2)),s2))
     return s2
 
-def subst(s, x):
+
+def subst(sentence, dic):
     """Substitute the substitution s into the expression x.
-    >>> subst({x: 42, y:0}, F(x) + y)
-    (F(42) + 0)
+    >>> subst(expr('P(x,f(x),y,z)'),{x:c,y:g(u)})
+    'P(c,f(c),g(u),z)'
     """
-    if isinstance(x, list):
-        return [subst(s, xi) for xi in x]
-    elif isinstance(x, tuple):
-        return tuple([subst(s, xi) for xi in x])
-    elif not isinstance(x, Expr):
-        return x
-    elif is_var_symbol(x.op):
-        return s.get(x, x)
-    else:
-        return Expr(x.op, *[subst(s, arg) for arg in x.args])
+    #print sentence.op, sentence.args, 'dict:',dic
+    if not isinstance(sentence, Expr):
+        return sentence
+    elif is_var_symbol(sentence.op) :#or isinstance(sentence.op, str):
+        if sentence in dic:
+            #print 'in dict', sentence,dic[sentence] 
+            return dic[sentence]
+    return Expr(sentence.op, *[subst(a, dic) for a in sentence.args])
+
 
 
 def standardize_apart(sentence, dic):
     """Replace all the variables in sentence with new variables."""
     if not isinstance(sentence, Expr):
+        print 'here'
         return sentence
     elif is_var_symbol(sentence.op):
         if sentence in dic:
@@ -261,44 +267,46 @@ def standardize_apart(sentence, dic):
 
 standardize_apart.counter = 0
 
-
-
+#x=expr('x')
+#s3={}
+#s3[x]=expr('c')
+#print subst(expr('P(x,f(g(x)),f(v))'), s3)
 #print expr('Q(x) ==> P(x)')
 #y2= expr('x ==> y')
 #h= expr('z ==> l')
 #
-#m=expr('P(x,g(x),g(f(a)))')
-#n=expr('P(f(u),v,v)')
+m=expr('P(x,g(x),g(f(a)))')
+n=expr('P(f(u),v,v)')
 #
-#f= unify(m, n, {})
-#print m,n, f
+f= unify(m, n, {})
+print m,n, f
 #
-#m=expr('P(a,y,f(y))')
-#n=expr('P(z,z,u)')
-#
-#f= unify(m, n, {})
-#print m,n,f
+m=expr('P(a,y,f(y))')
+n=expr('P(z,z,u)')
+
+f= unify(m, n, {})
+print m,n,f
 
 
 m = expr('P(x,g(x),x)')
 n = expr('P(g(u),g(g(z)),z)')
-print n.op, n.args
-f= unify(m, n, {})
-print m,n,f
-
-#print f[z]
-m = expr('P(x)')
-n = expr('P(z)')
-print m.args
 
 f= unify(m, n, {})
 print m,n,f
-
-#m=expr('Q(y,g(A,B))')
-#n=expr('Q(g(x,x),y)')
+#
+##print f[z]
+#m = expr('P(x)')
+#n = expr('P(f(x))')
+#print m.args
 #
 #f= unify(m, n, {})
 #print m,n,f
+
+m=expr('Q(y,g(A,B))')
+n=expr('Q(g(x,x),y)')
+
+f= unify(m, n, {})
+print m,n,f
 #
 #d= unify(y2, h, {})
 #print d
