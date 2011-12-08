@@ -313,3 +313,329 @@ print m,n,f
 #print d[y]
 #print x
 #
+
+
+#-------------CNF---------------------------
+
+def to_cnf(s):
+    """Convert a propositional logical sentence s to conjunctive normal form.
+    That is, of the form ((A | ~B | ...) & (B | C | ...) & ...) [p. 215]
+    >>> to_cnf("~(B|C)")
+    (~B & ~C)
+    >>> to_cnf("B <=> (P1|P2)")
+    ((~P1 | B) & (~P2 | B) & (P1 | P2 | ~B))
+    >>> to_cnf("a | (b & c) | d")
+    ((b | a | d) & (c | a | d))
+    >>> to_cnf("A & (B | (D & E))")
+    (A & (D | B) & (E | B))
+    """
+    if isinstance(s, str): s = expr(s)
+    s = eliminate_implications(s) # Steps 1, 2 from p. 215
+    s = move_not_inwards_helper(s) # Step 3
+    return distribute_and_over_or(s) # Step 4
+
+def eliminate_implications(s):
+    """Change >>, <<, and <=> into &, |, and ~. That is, return an Expr
+    that is equivalent to s, but has only &, |, and ~ as logical operators.
+    >>> eliminate_implications(A >> (~B << C))
+    ((~B | ~C) | ~A)
+    """
+    if not s.args or is_symbol(s.op): return s     ## (Atoms are unchanged.)
+    args = map(eliminate_implications, s.args)
+    a, b = args[0], args[-1]
+    if s.op == '>>':
+        return (b | ~a)
+    elif s.op == '<<':
+        return (a | ~b)
+    elif s.op == '<=>':
+        return (a | ~b) & (b | ~a)
+    else:
+        return Expr(s.op, *args)
+
+def move_not_inwards_helper(s):
+    """Rewrite sentence s by moving negation sign inward.
+    >>> move_not_inwards(~(A | B))
+    (~A & ~B)
+    >>> move_not_inwards(~(A & B))
+    (~A | ~B)
+    >>> move_not_inwards(~(~(A | ~B) | ~~C))
+    ((A | ~B) & ~C)
+    """
+    if s.op == '~':
+        NOT = lambda b: move_not_inwards_helper(~b)
+        a = s.args[0]
+        
+        if a.op == '~': return move_not_inwards_helper(a.args[0]) # ~~A ==> A
+        if a.op =='&': return NaryExpr('|', *map(NOT, a.args))
+        if a.op =='|': return NaryExpr('&', *map(NOT, a.args))
+        return s
+    elif is_symbol(s.op) or not s.args:
+        return s
+    else:
+        return Expr(s.op, *map(move_not_inwards_helper, s.args))
+
+def distribute_and_over_or(s):
+    """Given a sentence s consisting of conjunctions and disjunctions
+    of literals, return an equivalent sentence in CNF.
+    >>> distribute_and_over_or((A & B) | C)
+    ((A | C) & (B | C))
+    """
+    if s.op == '|':
+        s = NaryExpr('|', *s.args)
+        if len(s.args) == 0:
+            return FALSE
+        if len(s.args) == 1:
+            return distribute_and_over_or(s.args[0])
+        conj = find_if((lambda d: d.op == '&'), s.args)
+        if not conj:
+            return NaryExpr_helper(s.op, *s.args)
+        others = [a for a in s.args if a is not conj]
+        if len(others) == 1:
+            rest = others[0]
+        else:
+            rest = NaryExpr_helper('|', *others)
+        return NaryExpr_helper('&', *map(distribute_and_over_or,
+                                  [(c|rest) for c in conj.args]))
+    elif s.op == '&':
+        return NaryExpr_helper('&', *map(distribute_and_over_or, s.args))
+    else:
+        return s
+
+_NaryExprTable = {'&':TRUE, '|':FALSE, '+':ZERO, '*':ONE,
+                   'Exists': TWO}
+
+def NaryExpr_helper(op, *args):
+    """Create an Expr, but with an nary, associative op, so we can promote
+    nested instances of the same op up to the top level.
+    >>> NaryExpr('&', (A&B),(B|C),(B&C))
+    (A & B & (B | C) & B & C)
+    """
+    arglist = []
+    for arg in args:
+        if arg.op == op: arglist.extend(arg.args)
+        else: arglist.append(arg)
+    if len(args) == 1:
+        return args[0]
+    elif len(args) == 0:
+        return _NaryExprTable[op]
+    else:
+        return Expr(op, *arglist)
+
+def conjuncts(s):
+    """Return a list of the conjuncts in the sentence s.
+    >>> conjuncts(A & B)
+    [A, B]
+    >>> conjuncts(A | B)
+    [(A | B)]
+    """
+    if isinstance(s, Expr) and s.op == '&':
+        return s.args
+    else:
+        return [s]
+
+def disjuncts(s):
+    """Return a list of the disjuncts in the sentence s.
+    >>> disjuncts(A | B)
+    [A, B]
+    >>> disjuncts(A & B)
+    [(A & B)]
+    """
+    if isinstance(s, Expr) and s.op == '|':
+        return s.args
+    else:
+        return [s]
+
+
+#print expr('Q(x) ==> P(x)')
+#y2= expr('x ==> y')
+#h= expr('z ==> l')
+#
+#m=expr('P(x,g(x),g(f(a)))')
+#n=expr('P(f(u),v,v)')
+#
+#f= unify(m, n, {})
+#print m,n, f
+#
+#m=expr('P(a,y,f(y))')
+#n=expr('P(z,z,u)')
+#
+#f= unify(m, n, {})
+#print m,n,f
+
+#
+#m = expr('P(x,g(x),x)')
+#n = expr('P(g(u),g(g(z)),z)')
+#print n.op, n.args
+#f= unify(m, n, {})
+#print m,n,f
+#
+##print f[z]
+#m = expr('P(x)')
+#n = expr('P(z)')
+#print m.args
+#
+#f= unify(m, n, {})
+#print m,n,f
+
+#===============================================================================
+#===============================================================================
+#---------CNF Testing------------------------ 
+#===============================================================================
+#===============================================================================
+
+
+def eliminate_for_All (s):
+    
+#    print 'All: ' , s.op
+    
+    if (not s.args or is_symbol(s.op)) and not s.op == 'All': 
+        return s     ## (Atoms are unchanged.)
+    
+    args = map(eliminate_for_All, s.args)
+    b = args[-1]
+    
+    if s.op == 'All':
+        return b
+    else:
+        return Expr(s.op, *args)
+
+
+def NaryExpr(op, *args):
+    """Create an Expr, but with an nary, associative op, so we can promote
+    nested instances of the same op up to the top level.
+    >>> NaryExpr('&', (A&B),(B|C),(B&C))
+    (A & B & (B | C) & B & C)
+    """
+    arglist = []
+    for arg in args:
+        if arg.op == op and not arg.op == 'Exists': 
+            print 'nary argList: '
+            arglist.extend(arg.args)
+        else:
+            
+            if arg.op == 'Exists':
+                print 'Got the case', arg
+                print 'Help me: ', arg.args[0]
+             
+            print 'Appending arg in nary: ', arg
+            arglist.append(arg)
+    if len(args) == 1:
+        print 'Length of args is 1'
+        return args[0]
+    elif len(args) == 0:
+        print 'Length of args is 0'
+        return _NaryExprTable[op]
+    else:
+        if arg.op == 'Exists':
+                print 'Got the case222', arg
+                print 'Help me: ', arg.args[0]
+        
+        print 'Will return the expression with its args list'
+        return Expr(op, *arglist)
+  
+        
+    
+#    if isinstance(s, Expr) and s.op == 'Exists':
+#       
+#        s.args[0] = ~s.args[0] 
+#        return s.args
+#    else:
+#        return [s]
+    
+  
+def test3(s):
+    
+    print '\n'
+    print 'Start!: ', s 
+    if s.op == '~':
+        NOT = lambda b: test3(~b)
+#        NOT2 = lambda b: test3(~b.args[1])
+        a = s.args[0]
+        print 'A: ', a
+        print 'Args of a', a.args
+        
+#        print 'Second Args of a', a.args[1]
+        
+        
+        if a.op =='All': 
+            print 'Hello from All!'
+            print 'All args of a: ' , a.args
+#            return test3(a.args[1]) 
+            
+#            return nary('Exists', *map(NOT, a.args))
+            return NaryExpr('Exists', *[a.args[0], NOT (a.args[1])])
+            
+        if a.op == '~': 
+            print 'Hello from negation!'
+            return test3(a.args[0]) # ~~A ==> A
+        if a.op =='&': 
+            print 'Hello from AND!'
+            return NaryExpr('|', *map(NOT, a.args))
+        if a.op =='|':
+            print 'Hello from OR!' 
+            return NaryExpr('&', *map(NOT, a.args))
+        return s
+    elif (is_symbol(s.op) or not s.args):
+        print 'Hello from Base case!'
+        return s
+    else:
+        print 'Hello from unknown!'
+        return Expr(s.op, *map(test3, s.args))       
+
+#m = expr('x <=> y')
+#
+#n = to_cnf(m)
+#
+#print 'CNF: ', n 
+
+
+      
+
+m = expr ('All(x, B(x) <=> Q(x))')
+
+#print m
+
+
+g = expr ('~(All (x, All(y, P(x) | M(x, y) )))')
+
+print 'All expression: ', g
+
+#print 'Expr of elimination: ', eliminate_for_All(g)
+
+m = expr ('~(All (x, All(y, P(x) | M(x, y) )))')
+
+
+#notm = test2(m)
+notm = test3(m)
+
+
+print 'Negation in For all: ', notm
+
+
+
+
+
+#print 'Removing negation: ', test3_h(notm)
+
+#h = eliminate_for_All(m)
+
+#print to_cnf(h)
+
+
+
+#print eliminate_for_All(m)
+
+
+#print expr('ForAll x');
+
+#m=expr('Q(y,g(A,B))')
+#n=expr('Q(g(x,x),y)')
+#
+#f= unify(m, n, {})
+#print m,n,f
+#
+#d= unify(y2, h, {})
+#print d
+#print d[y]
+#print x
+#
