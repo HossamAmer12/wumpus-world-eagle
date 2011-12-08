@@ -519,12 +519,12 @@ def NaryExpr(op, *args):
     else:
         return Expr(op, *arglist)
     
-def test3(s):
+def move_not_inwards(s):
 
 #    print '\n'
 #    print 'Start!: ', s 
     if s.op == '~':
-        NOT = lambda b: test3(~b)
+        NOT = lambda b: move_not_inwards(~b)
         a = s.args[0]
         
         
@@ -536,7 +536,7 @@ def test3(s):
 
         if a.op == '~': 
 #            print 'Hello from negation!'
-            return test3(a.args[0]) # ~~A ==> A
+            return move_not_inwards(a.args[0]) # ~~A ==> A
         if a.op =='&': 
 #            print 'Hello from AND!'
             return NaryExpr('|', *map(NOT, a.args))
@@ -549,7 +549,7 @@ def test3(s):
         return s
     else:
 #        print 'Hello from unknown!'
-        return Expr(s.op, *map(test3, s.args))       
+        return Expr(s.op, *map(move_not_inwards, s.args))       
 
 #m = expr('x <=> y')
 #
@@ -575,7 +575,7 @@ m = expr ('~(All (x, All(y, P(x) | M(x, y) )))')
 
 
 #notm = test2(m)
-notm = test3(m)
+notm = move_not_inwards(m)
 
 
 print 'Negation in For all: ', notm
@@ -583,13 +583,13 @@ print 'Negation in For all: ', notm
 
 m = expr ('~(Exists (x, Exists(y, P(x) | M(x, y) )))')
 print '\nExpression to negate: ', m
-notm = test3(m)
+notm = move_not_inwards(m)
 
 print 'Negation in There Exists: ', notm
 
 m = expr ('~(Exists (x, All(y, P(x) | M(x, y) )))')
 print '\nExpression to negate: ', m
-notm = test3(m)
+notm = move_not_inwards(m)
 
 print 'Negation in There Exists with For all: ', notm
 
