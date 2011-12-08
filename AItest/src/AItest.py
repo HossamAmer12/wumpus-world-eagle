@@ -401,8 +401,7 @@ def distribute_and_over_or(s):
     else:
         return s
 
-_NaryExprTable = {'&':TRUE, '|':FALSE, '+':ZERO, '*':ONE,
-                   'Exists': TWO}
+_NaryExprTable = {'&':TRUE, '|':FALSE, '+':ZERO, '*':ONE}
 
 def NaryExpr_helper(op, *args):
     """Create an Expr, but with an nary, associative op, so we can promote
@@ -526,7 +525,6 @@ def move_not_inwards(s):
     if s.op == '~':
         NOT = lambda b: move_not_inwards(~b)
         a = s.args[0]
-        
         
         if a.op =='All': 
             return NaryExpr('Exists', *[a.args[0], NOT(a.args[1])])
