@@ -574,8 +574,6 @@ print '\nExpression to negate: ', g
 m = expr ('~(All (x, All(y, P(x) | M(x, y) )))')
 
 
-print 'hashas', eliminate_for_All(m)
-
 #notm = test2(m)
 notm = move_not_inwards(m)
 
