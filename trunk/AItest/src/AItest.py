@@ -508,7 +508,7 @@ def NaryExpr(op, *args):
     """
     arglist = []
     for arg in args:
-        if arg.op == op and not arg.op == 'Exists': 
+        if arg.op == op and not arg.op == 'Exists' and not arg.op == 'All': 
             arglist.extend(arg.args)
         else:            
             arglist.append(arg)
@@ -529,8 +529,11 @@ def test3(s):
         
         
         if a.op =='All': 
-            return NaryExpr('Exists', *[a.args[0], NOT (a.args[1])])
-            
+            return NaryExpr('Exists', *[a.args[0], NOT(a.args[1])])
+        
+        if a.op =='Exists': 
+            return NaryExpr('All', *[a.args[0], NOT(a.args[1])])
+
         if a.op == '~': 
 #            print 'Hello from negation!'
             return test3(a.args[0]) # ~~A ==> A
@@ -564,7 +567,7 @@ m = expr ('All(x, B(x) <=> Q(x))')
 
 g = expr ('~(All (x, All(y, P(x) | M(x, y) )))')
 
-print 'All expression: ', g
+print '\nExpression to negate: ', g
 
 #print 'Expr of elimination: ', eliminate_for_All(g)
 
@@ -578,7 +581,17 @@ notm = test3(m)
 print 'Negation in For all: ', notm
 
 
+m = expr ('~(Exists (x, Exists(y, P(x) | M(x, y) )))')
+print '\nExpression to negate: ', m
+notm = test3(m)
 
+print 'Negation in There Exists: ', notm
+
+m = expr ('~(Exists (x, All(y, P(x) | M(x, y) )))')
+print '\nExpression to negate: ', m
+notm = test3(m)
+
+print 'Negation in There Exists with For all: ', notm
 
 
 #print 'Removing negation: ', test3_h(notm)
