@@ -509,77 +509,43 @@ def NaryExpr(op, *args):
     arglist = []
     for arg in args:
         if arg.op == op and not arg.op == 'Exists': 
-            print 'nary argList: '
             arglist.extend(arg.args)
-        else:
-            
-            if arg.op == 'Exists':
-                print 'Got the case', arg
-                print 'Help me: ', arg.args[0]
-             
-            print 'Appending arg in nary: ', arg
+        else:            
             arglist.append(arg)
     if len(args) == 1:
-        print 'Length of args is 1'
         return args[0]
     elif len(args) == 0:
-        print 'Length of args is 0'
         return _NaryExprTable[op]
     else:
-        if arg.op == 'Exists':
-                print 'Got the case222', arg
-                print 'Help me: ', arg.args[0]
-        
-        print 'Will return the expression with its args list'
         return Expr(op, *arglist)
-  
-        
     
-#    if isinstance(s, Expr) and s.op == 'Exists':
-#       
-#        s.args[0] = ~s.args[0] 
-#        return s.args
-#    else:
-#        return [s]
-    
-  
 def test3(s):
-    
-    print '\n'
-    print 'Start!: ', s 
+
+#    print '\n'
+#    print 'Start!: ', s 
     if s.op == '~':
         NOT = lambda b: test3(~b)
-#        NOT2 = lambda b: test3(~b.args[1])
         a = s.args[0]
-        print 'A: ', a
-        print 'Args of a', a.args
-        
-#        print 'Second Args of a', a.args[1]
         
         
         if a.op =='All': 
-            print 'Hello from All!'
-            print 'All args of a: ' , a.args
-#            return test3(a.args[1]) 
-            
-#            return nary('Exists', *map(NOT, a.args))
             return NaryExpr('Exists', *[a.args[0], NOT (a.args[1])])
             
         if a.op == '~': 
-            print 'Hello from negation!'
+#            print 'Hello from negation!'
             return test3(a.args[0]) # ~~A ==> A
         if a.op =='&': 
-            print 'Hello from AND!'
+#            print 'Hello from AND!'
             return NaryExpr('|', *map(NOT, a.args))
         if a.op =='|':
-            print 'Hello from OR!' 
+#            print 'Hello from OR!' 
             return NaryExpr('&', *map(NOT, a.args))
         return s
     elif (is_symbol(s.op) or not s.args):
-        print 'Hello from Base case!'
+#        print 'Hello from Base case!'
         return s
     else:
-        print 'Hello from unknown!'
+#        print 'Hello from unknown!'
         return Expr(s.op, *map(test3, s.args))       
 
 #m = expr('x <=> y')
