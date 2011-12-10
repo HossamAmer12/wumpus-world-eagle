@@ -1,7 +1,8 @@
 
 
 import re
-from utils import *
+#from utils import *
+from utils import num_or_str,isnumber,issequence,if_,find_if
 
 
 
@@ -271,24 +272,24 @@ def subst(sentence, dic):
 #y2= expr('x ==> y')
 #h= expr('z ==> l')
 #
-m=expr('P(x,g(x),g(f(a)))')
-n=expr('P(f(u),v,v)')
+#m=expr('P(x,g(x),g(f(a)))')
+#n=expr('P(f(u),v,v)')
 #
-f= unify(m, n, {})
-print m,n, f
+#f= unify(m, n, {})
+#print m,n, f
 #
-m=expr('P(a,y,f(y))')
-n=expr('P(z,z,u)')
+#m=expr('P(a,y,f(y))')
+#n=expr('P(z,z,u)')
 
-f= unify(m, n, {})
-print m,n,f
+#f= unify(m, n, {})
+#print m,n,f
 
 
-m = expr('P(x,g(x),x)')
-n = expr('P(g(u),g(g(z)),z)')
-
-f= unify(m, n, {})
-print m,n,f
+#m = expr('P(x,g(x),x)')
+#n = expr('P(g(u),g(g(z)),z)')
+#
+#f= unify(m, n, {})
+#print m,n,f
 #
 ##print f[z]
 #m = expr('P(x)')
@@ -298,11 +299,11 @@ print m,n,f
 #f= unify(m, n, {})
 #print m,n,f
 
-m=expr('Q(y,g(A,B))')
-n=expr('Q(g(x,x),y)')
-
-f= unify(m, n, {})
-print m,n,f
+#m=expr('Q(y,g(A,B))')
+#n=expr('Q(g(x,x),y)')
+#
+#f= unify(m, n, {})
+#print m,n,f
 #
 #d= unify(y2, h, {})
 #print d
@@ -429,11 +430,44 @@ def standardize_apart(s):
     """
     return s
 
-def skolemize(s):
+def skolemize(s,qun=[],dict={}):
     """
     step 5: to remove exist
     """
-    return s
+    print s, qun , dict
+#    if not isinstance(s, Expr):
+#        return s
+    if is_symbol(s.op) and s.op == 'All':#if it's for all save the var to add to function
+        qun2=qun[:]
+        qun2.append(s.args[0])
+        return Expr(s.op,*[s.args[0],skolemize(s.args[1],qun2,dict)])
+    if  is_symbol(s.op) and s.op == 'Exists':# if it's there exists add new substitution for this var to dict 
+        if qun!=[]:
+            skolemize.__functionsCount+=1
+            f=  Expr('f_%d' % skolemize.__functionsCount)
+        else:
+            skolemize.__varscount+=1
+            f=  Expr('v_%d' % skolemize.__varscount)
+        dict2=dict.copy()
+        dict2[s.args[0]]=Expr(f.op,*qun)
+        return skolemize(s.args[1], qun,dict2)
+    if is_variable(s):# if variable subsititute 
+        if s in dict:
+            return dict[s]
+        else: 
+            return s
+    else:#otherwise continue with args 
+        return Expr(s.op,*map(lambda x: skolemize(x,qun,dict),s.args))
+# counters to make functions and vars unique          
+skolemize.__varscount=0
+skolemize.__functionsCount=0
+
+#testing skolemize
+e=expr('All(i,All(z,Exists(x ,R(i) & Exists(y,P(x,y,z)))) | Exists(u,Q(u) &E(i))) & Exists(x,Exists(y,M(x,y))) | Exists(y,M(x,y))')
+print e, e.op,e.args
+print skolemize(e)
+
+
 
 def eliminate_for_All (s):
     """
@@ -586,19 +620,19 @@ def conjuncts(s):
 
       
 
-m = expr ('All(x, B(x) <=> Q(x))')
-
-print m
-print to_clause_form(m, True)
-
-
-g = expr ('~(All (x, All(y, P(x) | ~M(x, y) )))')
+#m = expr ('All(x, B(x) <=> Q(x))')
+#
+#print m
+#print to_clause_form(m, True)
+#
+#
+#g = expr ('~(All (x, All(y, P(x) | ~M(x, y) )))')
 
 #print '\nExpression to negate: ', g
 
 #print 'Expr of elimination: ', eliminate_for_All(g)
 
-m = expr ('~(All (x, All(y, P(x) | M(x, y) )))')
+#m = expr ('~(All (x, All(y, P(x) | M(x, y) )))')
 
 
 #notm = test2(m)
