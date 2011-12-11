@@ -684,7 +684,7 @@ print n
 h  = expr (' All(x, ( P(x, A) & Q(x, B))  >> R(x))')
 
 #print to_clause_form(l, False)
-# BUG
+# BUG > Fixed
 print to_cnf(h, True)
 
 
