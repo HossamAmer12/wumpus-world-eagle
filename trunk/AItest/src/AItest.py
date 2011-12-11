@@ -428,7 +428,10 @@ def move_not_inwards(s):
         return s
     elif (is_symbol(s.op) or not s.args):
 #        print 'Hello from Base case!'
-        return s
+        if s.op == 'All' or s.op == 'Exists':
+            return Expr(s.op, *map(move_not_inwards, s.args))
+        else:
+            return s
     else:
 #        print 'Hello from unknown!'
         return Expr(s.op, *map(move_not_inwards, s.args))   
