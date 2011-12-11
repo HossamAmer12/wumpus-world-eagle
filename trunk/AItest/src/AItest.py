@@ -337,28 +337,28 @@ def to_cnf(s, trace = False):
     (A & (D | B) & (E | B))
     """
     if isinstance(s, str): s = expr(s)
-    if trace: print 'Original:\n',s
+    if trace: print '\nOriginal:\n',s
     
     s= eliminate_equivalence(s) # Step 1
-    if trace: print 'Step 1:(Eliminate Equivalence)\n',s
+    if trace: print '\nStep 1:(Eliminate Equivalence)\n',s
     
     s = eliminate_implications(s) # Steps 2
-    if trace: print 'Step 2:(Eliminate Implication)\n',s
+    if trace: print '\nStep 2:(Eliminate Implication)\n',s
     
     s = move_not_inwards(s) # Step 3
-    if trace: print 'Step 3:(Move not inwards)\n',s
+    if trace: print '\nStep 3:(Move not inwards)\n',s
     
     s = standardize_apart(s) # Step 4
-    if trace: print 'Step 4:(Standardize apart)\n',s
+    if trace: print '\nStep 4:(Standardize apart)\n',s
     
     s = skolemize(s) # Step 5
-    if trace: print 'Step 5:(Skolemize)\n',s
+    if trace: print '\nStep 5:(Skolemize)\n',s
     
     s = eliminate_for_All(s) # Step 6
-    if trace: print 'Step 6:(Eliminate for all)\n',s
+    if trace: print '\nStep 6:(Eliminate for all)\n',s
     
     s = distribute_and_over_or(s) # Step 7,8
-    if trace: print 'Step 7,8:(Distribute And over Or and flatten)\n',s
+    if trace: print '\nStep 7,8:(Distribute And over Or and flatten)\n',s
     
     return s 
 
