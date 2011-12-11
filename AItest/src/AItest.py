@@ -665,12 +665,25 @@ print to_clause_form(n, False)
 # Taken from: Working wrong! > Bug in move not inwards 
 # https://docs.google.com/viewer?url=http%3A%2F%2Fwww.cse.msstate.edu%2F~hansen%2Fclasses%2FAIspring04%2Fslides%2Fpredicatelogic.pdf
 #===============================================================================
-l = expr ('All(x, (Pass(x, History) & Win (x, Lottery)) >> Happy(x))')
+#l = expr ('All(x, (Pass(x, History) & Win (x, Lottery)) >> Happy(x))')
 
 # Take care: you should not write the previous expression as:
 # l = expr ('All(x, Pass(x, History) & Win (x, Lottery) >> Happy(x))')
 
-print to_clause_form(l, True)
+#print to_clause_form(l, True)
+
+h  = expr (' ( P(x, A) & Q(x, B)) >> R(x)')
+
+n = to_cnf(h)
+
+print n 
+
+h  = expr (' All(x, ( P(x, A) & Q(x, B))  >> R(x))')
+
+#print to_clause_form(l, False)
+# BUG
+print to_cnf(h, True)
+
 
 #
 #
