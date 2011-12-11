@@ -490,9 +490,9 @@ skolemize.__functionsCount=0
 #testing skolemize
 e=expr('All(i,All(z,Exists(x ,R(i) & Exists(y,P(x,y,z)))) | Exists(y,Q(y) &E(i))) & Exists(x,Exists(y,M(x,y))) | Exists(y,M(x,y))')
 #print e, e.op,e.args
-print e
-print standardize_apart(e) 
-print skolemize(e)
+#print e
+#print standardize_apart(e) 
+#print skolemize(e)
 
 
 
