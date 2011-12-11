@@ -753,3 +753,6 @@ print to_cnf(n, True)
 #print d[y]
 #print x
 #
+
+
+# Our reference: http://aima.cs.berkeley.edu/python/logic.html 
