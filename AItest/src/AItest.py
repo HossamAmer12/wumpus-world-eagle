@@ -86,23 +86,23 @@ class Expr:
 
     # See http://www.python.org/doc/current/lib/module-operator.html
     # Not implemented: not, abs, pos, concat, contains, *item, *slice
-    def __lt__(self, other):     return Expr('<',  self, other)
-    def __le__(self, other):     return Expr('<=', self, other)
-    def __ge__(self, other):     return Expr('>=', self, other)
-    def __gt__(self, other):     return Expr('>',  self, other)
-    def __add__(self, other):    return Expr('+',  self, other)
-    def __sub__(self, other):    return Expr('-',  self, other)
+#    def __lt__(self, other):     return Expr('<',  self, other)
+#    def __le__(self, other):     return Expr('<=', self, other)
+#    def __ge__(self, other):     return Expr('>=', self, other)
+#    def __gt__(self, other):     return Expr('>',  self, other)
+#    def __add__(self, other):    return Expr('+',  self, other)
+#    def __sub__(self, other):    return Expr('-',  self, other)
     def __and__(self, other):    return Expr('&',  self, other)
-    def __div__(self, other):    return Expr('/',  self, other)
-    def __truediv__(self, other):return Expr('/',  self, other)
+#    def __div__(self, other):    return Expr('/',  self, other)
+#    def __truediv__(self, other):return Expr('/',  self, other)
     def __invert__(self):        return Expr('~',  self)
     def __lshift__(self, other): return Expr('<<', self, other)
     def __rshift__(self, other): return Expr('>>', self, other)
-    def __mul__(self, other):    return Expr('*',  self, other)
+#    def __mul__(self, other):    return Expr('*',  self, other)
     def __neg__(self):           return Expr('-',  self)
     def __or__(self, other):     return Expr('|',  self, other)
-    def __pow__(self, other):    return Expr('**', self, other)
-    def __xor__(self, other):    return Expr('^',  self, other)
+#    def __pow__(self, other):    return Expr('**', self, other)
+#    def __xor__(self, other):    return Expr('^',  self, other)
     def __mod__(self, other):    return Expr('<=>',  self, other) ## (x % y)
 
 
@@ -220,10 +220,10 @@ def extend(s, var, val):
     # substitute the variables in val with the values from s2
     t= subst(val,s2)
     # check if any substitution leads to a loop 
-#    for sub in s2:
-#        if occur_check(var, s2[sub]):
-#            if occur_check(sub, val):
-#                return None
+    for sub in s2:
+        if occur_check(var, s2[sub]):
+            if occur_check(sub, val):
+                return None
     #insert t in s2
     s2[var] = t
     # fixing vlues of dict according to added sub
@@ -424,17 +424,32 @@ def move_not_inwards(s):
         return Expr(s.op, *map(move_not_inwards, s.args))   
 
 
-def standardize_apart(s):
+def standardize_apart(s,dic={}):
     """
     step 4: rename variables
     """
-    return s
+    if is_symbol(s.op) and (s.op == 'All' or s.op == 'Exists'):
+        dictTemp=dic.copy()
+        standardize_apart.counter += 1
+        dictTemp[s.args[0]] = Expr('x_%d' % standardize_apart.counter)
+        return Expr(s.op, *[standardize_apart(a, dictTemp) for a in s.args]) 
+    elif is_variable(s.op):
+        if s in dic:
+            return dic[s]
+        else:
+            return s
+    else:
+        return Expr(s.op, *[standardize_apart(a, dic) for a in s.args])
+
+standardize_apart.counter = 0
+    
+
 
 def skolemize(s,qun=[],dict={}):
     """
     step 5: to remove exist
     """
-    print s, qun , dict
+    #print s, qun , dict
 #    if not isinstance(s, Expr):
 #        return s
     if is_symbol(s.op) and s.op == 'All':#if it's for all save the var to add to function
@@ -463,8 +478,10 @@ skolemize.__varscount=0
 skolemize.__functionsCount=0
 
 #testing skolemize
-e=expr('All(i,All(z,Exists(x ,R(i) & Exists(y,P(x,y,z)))) | Exists(u,Q(u) &E(i))) & Exists(x,Exists(y,M(x,y))) | Exists(y,M(x,y))')
-print e, e.op,e.args
+e=expr('All(i,All(z,Exists(x ,R(i) & Exists(y,P(x,y,z)))) | Exists(y,Q(y) &E(i))) & Exists(x,Exists(y,M(x,y))) | Exists(y,M(x,y))')
+#print e, e.op,e.args
+print e
+print standardize_apart(e) 
 print skolemize(e)
 
 
