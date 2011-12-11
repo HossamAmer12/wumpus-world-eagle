@@ -662,7 +662,7 @@ m = expr ('All(x, B(x) <=> Q(x))')
 #===============================================================================
 n = expr ('All(x, P(x) | Q(x)) >> Exists(y, R(x, y))')
 
-print to_clause_form(n, False)
+print to_clause_form(n)
 
 #===============================================================================
 # Taken from: Working wrong! > Bug in move not inwards 
