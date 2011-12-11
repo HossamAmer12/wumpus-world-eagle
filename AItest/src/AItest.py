@@ -650,7 +650,17 @@ def conjuncts(s):
 m = expr ('All(x, B(x) <=> Q(x))')
 #
 #print m
-print to_clause_form(m, True)
+#print to_clause_form(m, True)
+
+
+#===============================================================================
+# Taken from: Working right! 
+# http://www.csupomona.edu/~jrfisher/www/prolog_tutorial/logic_topics/normal_forms/normal_form.html
+#===============================================================================
+n = expr ('All(x, P(x) | Q(x)) >> Exists(y, R(x, y))')
+
+print to_clause_form(n, False)
+
 #
 #
 #g = expr ('~(All (x, All(y, P(x) | ~M(x, y) )))')
