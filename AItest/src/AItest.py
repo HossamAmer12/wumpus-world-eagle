@@ -318,8 +318,10 @@ def subst(sentence, dic):
 
 def to_clause_form(s,trace= False):
     temp = to_cnf(s, trace)
-    temp = disjuncts(temp)
-    temp = conjuncts(temp)
+#    temp = disjuncts(temp)
+#    temp = conjuncts(temp)
+#    print temp, 'this is the temp'
+    temp =  addClause(temp)
     return temp
     
 #-------------CNF---------------------------
@@ -360,9 +362,33 @@ def to_cnf(s, trace = False):
     s = distribute_and_over_or(s) # Step 7,8
     if trace: print '\nStep 7,8:(Distribute And over Or and flatten)\n',s
     
+   
+    
     return s 
 
 
+
+
+def addClause(s):
+    list = []
+#    if is_symbol(s.op):
+#        return s
+#    if s.op == '|':
+#        args = map(addClause,s.args)
+    list = disjunction_clause(s)
+    return list
+#    print list,'this is a list'
+        
+
+def disjunction_clause(s):
+    if is_symbol(s.op):
+        print s
+        return s
+    else:
+        return map(disjuncts,s.args)
+    
+    
+   
 
 def eliminate_equivalence(s):
     """
@@ -650,7 +676,7 @@ def conjuncts(s):
 
       
 
-m = expr ('All(x, B(x) <=> Q(x))')
+#m = expr ('All(x, B(x) <=> Q(x))')
 #
 #print m
 #print to_clause_form(m, True)
@@ -660,9 +686,9 @@ m = expr ('All(x, B(x) <=> Q(x))')
 # Taken from: Working right! 
 # http://www.csupomona.edu/~jrfisher/www/prolog_tutorial/logic_topics/normal_forms/normal_form.html
 #===============================================================================
-n = expr ('All(x, P(x) | Q(x)) >> Exists(y, R(x, y))')
-
-print to_clause_form(n)
+#n = expr ('All(x, P(x) | Q(x)) >> Exists(y, R(x, y))')
+#
+#print to_clause_form(n)
 
 #===============================================================================
 # Taken from: Working wrong! > Bug in move not inwards 
@@ -671,31 +697,33 @@ print to_clause_form(n)
 #l = expr ('All(x, (Pass(x, History) & Win (x, Lottery)) >> Happy(x))')
 
 # Take care: you should not write the previous expression as:
-# l = expr ('All(x, Pass(x, History) & Win (x, Lottery) >> Happy(x))')
+#l = expr ('All(x, Pass(x, History) & Win (x, Lottery) >> Happy(x))')
 
 #print to_clause_form(l, True)
 
-h  = expr (' ( P(x, A) & Q(x, B)) >> R(x)')
+#h  = expr (' ( P(x, A) & Q(x, B)) >> R(x)')
+#
+#n = to_cnf(h)
+#
+#print n 
 
-n = to_cnf(h)
+#print to_clause_form(h, True)
+#
+#h  = expr (' All(x, ( P(x, A) & Q(x, B))  >> R(x))')
 
-print n 
-
-h  = expr (' All(x, ( P(x, A) & Q(x, B))  >> R(x))')
-
-#print to_clause_form(l, False)
+#print to_clause_form(h, True)
 # BUG > Fixed
-print to_cnf(h)
+#print to_cnf(h)
 
 # Expressions from the Project description
 
-m = expr ('Exists (x, (P(x) & All (x, Q(x) >> ~P(x) ) ) )')
-
-print to_cnf(m, True) #need to check the renaming?
-
-n = expr ('All (x, P(x) <=> (Q(x) & Exists (y, (Q(y) & R(y, x)))))')
-
-print to_cnf(n, True)
+#m = expr ('Exists (x, (P(x) & All (x, Q(x) >> ~P(x) ) ) )')
+#
+#print to_cnf(m, True) #need to check the renaming?
+#
+#n = expr ('All (x, P(x) <=> (Q(x) & Exists (y, (Q(y) & R(y, x)))))')
+#
+#print to_clause_form(n, True)
 
 #print to_cnf(n, True)
 #
@@ -722,7 +750,7 @@ print to_cnf(n, True)
 #
 #print 'Negation in There Exists: ', notm
 #
-#m = expr ('~(Exists (x, All(y, P(x) | M(x, y) )))')
+m = expr ('~(Exists (x, All(y, P(x) | M(x, y) )))')
 #print '\nExpression to negate: ', m
 #notm = move_not_inwards(m)
 #
@@ -733,7 +761,7 @@ print to_cnf(n, True)
 
 #h = eliminate_for_All(m)
 
-#print to_cnf(h)
+print to_clause_form(m,True)
 
 
 
