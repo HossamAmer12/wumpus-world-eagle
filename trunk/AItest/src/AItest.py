@@ -685,9 +685,19 @@ h  = expr (' All(x, ( P(x, A) & Q(x, B))  >> R(x))')
 
 #print to_clause_form(l, False)
 # BUG > Fixed
-print to_cnf(h, True)
+print to_cnf(h)
 
+# Expressions from the Project description
 
+m = expr ('Exists (x, (P(x) & All (x, Q(x) >> ~P(x) ) ) )')
+
+print to_cnf(m, True) #need to check the renaming?
+
+n = expr ('All (x, P(x) <=> (Q(x) & Exists (y, (Q(y) & R(y, x)))))')
+
+print to_cnf(n, True)
+
+#print to_cnf(n, True)
 #
 #
 #g = expr ('~(All (x, All(y, P(x) | ~M(x, y) )))')
