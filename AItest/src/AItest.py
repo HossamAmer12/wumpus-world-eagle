@@ -754,5 +754,4 @@ print to_cnf(n, True)
 #print x
 #
 
-
-# Our reference: http://aima.cs.berkeley.edu/python/logic.html 
+ 
