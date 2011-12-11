@@ -318,7 +318,6 @@ def subst(sentence, dic):
 
 def to_clause_form(s,trace= False):
     temp = to_cnf(s, trace)
-    if trace: print temp
     temp = disjuncts(temp)
     temp = conjuncts(temp)
     return temp
@@ -338,17 +337,28 @@ def to_cnf(s, trace = False):
     (A & (D | B) & (E | B))
     """
     if isinstance(s, str): s = expr(s)
-    #print 'here'
+    if trace: print 'Original:\n',s
+    
     s= eliminate_equivalence(s) # Step 1
-    print 'eq', s
+    if trace: print 'Step 1:(Elimenate Equivalence)\n',s
+    
     s = eliminate_implications(s) # Steps 2
-    print 'Step 2', s
+    if trace: print 'Step 2:(Elimenate Implication)\n',s
+    
     s = move_not_inwards(s) # Step 3
-    #print 'Step 3'
+    if trace: print 'Step 3:(Move not inward)\n',s
+    
     s = standardize_apart(s) # Step 4
+    if trace: print 'Step 4:(Standardize apart)\n',s
+    
     s = skolemize(s) # Step 5
+    if trace: print 'Step 5:(Skolemize)\n',s
+    
     s = eliminate_for_All(s) # Step 6
-    s = distribute_and_over_or(s) # Step 7
+    if trace: print 'Step 6:(Eliminate for all)\n',s
+    
+    s = distribute_and_over_or(s) # Step 7,8
+    if trace: print 'Step 7,8:(Distribute And over Or and flaten)\n',s
     
     return s 
 
@@ -637,10 +647,10 @@ def conjuncts(s):
 
       
 
-#m = expr ('All(x, B(x) <=> Q(x))')
+m = expr ('All(x, B(x) <=> Q(x))')
 #
 #print m
-#print to_clause_form(m, True)
+print to_clause_form(m, True)
 #
 #
 #g = expr ('~(All (x, All(y, P(x) | ~M(x, y) )))')
