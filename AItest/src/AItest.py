@@ -661,6 +661,17 @@ n = expr ('All(x, P(x) | Q(x)) >> Exists(y, R(x, y))')
 
 print to_clause_form(n, False)
 
+#===============================================================================
+# Taken from: Working wrong! > Bug in move not inwards 
+# https://docs.google.com/viewer?url=http%3A%2F%2Fwww.cse.msstate.edu%2F~hansen%2Fclasses%2FAIspring04%2Fslides%2Fpredicatelogic.pdf
+#===============================================================================
+l = expr ('All(x, (Pass(x, History) & Win (x, Lottery)) >> Happy(x))')
+
+# Take care: you should not write the previous expression as:
+# l = expr ('All(x, Pass(x, History) & Win (x, Lottery) >> Happy(x))')
+
+print to_clause_form(l, True)
+
 #
 #
 #g = expr ('~(All (x, All(y, P(x) | ~M(x, y) )))')
