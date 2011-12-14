@@ -1,0 +1,62 @@
+
+\documentclass[12pt, a4paper]{report}%, oneside
+
+\usepackage[headings]{fullpage}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subfig}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{appendix}
+\usepackage[pdfborder={0 0 0}, colorlinks=true, linkcolor=black, citecolor=blue]{hyperref}
+\usepackage[printonlyused]{acronym}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{ifpdf}
+
+
+
+\usepackage{fmtcount} % displaying latex counters
+\usepackage{listings}
+
+\newcommand{\submissionDay}{26}
+\newcommand{\submissionMonth}{November}
+\newcommand{\submissionYear}{2011}
+\newcommand{\submissionDate}{\submissionDay~\submissionMonth,~\submissionYear}
+\newcommand{\typeOfThesis}{Project One}
+
+\newcommand{\titleOfThesisOne}{Agent Searching strategies}
+
+\newcommand{\authorOfThesis}{Hossam Amer}
+
+
+\ifpdf
+\pdfinfo{
+   /Author (\authorOfThesis)
+   /Title  (\titleOfThesisOne)
+   /CreationDate (D: 20090707085533)
+   /Subject (\typeOfThesis)
+}
+\fi
+
+\begin{document}
+% \overfullrule=5pt
+\pagestyle{plain}
+\pagenumbering{Roman}
+
+\include{GUC_TitlePage}
+
+\pagestyle{headings}
+\pagenumbering{arabic}
+
+\setlength\parskip{.5\baselineskip plus .2\baselineskip
+	minus .4\baselineskip}
+\setcounter{chapter}{1}
+\setcounter{section}{0}
+
+\include{assign1}
+
+\end{document}
+

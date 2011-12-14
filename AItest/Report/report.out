@@ -1,0 +1,16 @@
+\BOOKMARK [1][-]{section.1.1}{Problem Definition}{}% 1
+\BOOKMARK [2][-]{subsection.1.1.1}{State Definition}{section.1.1}% 2
+\BOOKMARK [2][-]{subsection.1.1.2}{Node Definition}{section.1.1}% 3
+\BOOKMARK [2][-]{subsection.1.1.3}{Global Variables Definition}{section.1.1}% 4
+\BOOKMARK [2][-]{subsection.1.1.4}{Possible Actions Definition}{section.1.1}% 5
+\BOOKMARK [2][-]{subsection.1.1.5}{Methods Description}{section.1.1}% 6
+\BOOKMARK [1][-]{section.1.2}{Heuristic functions Description}{}% 7
+\BOOKMARK [1][-]{section.1.3}{Search Strategies Implementation}{}% 8
+\BOOKMARK [2][-]{subsection.1.3.1}{Breadth First Search}{section.1.3}% 9
+\BOOKMARK [2][-]{subsection.1.3.2}{Depth First Search}{section.1.3}% 10
+\BOOKMARK [2][-]{subsection.1.3.3}{Iterative Deepening Search}{section.1.3}% 11
+\BOOKMARK [2][-]{subsection.1.3.4}{Uniform Cost Search}{section.1.3}% 12
+\BOOKMARK [2][-]{subsection.1.3.5}{A-star Search}{section.1.3}% 13
+\BOOKMARK [1][-]{section.1.4}{Dealing with Repeated States}{}% 14
+\BOOKMARK [1][-]{section.1.5}{Comparing Search Strategies}{}% 15
+\BOOKMARK [1][-]{section.1.6}{References}{}% 16
