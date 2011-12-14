@@ -27,8 +27,6 @@ def num_or_str(x):
         except ValueError:
                 return str(x).strip()
 
-
-
 def isnumber(x):
     "Is x a number? We say it is if it has a __int__ method."
     return hasattr(x, '__int__')
