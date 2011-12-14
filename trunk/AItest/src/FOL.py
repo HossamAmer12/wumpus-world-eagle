@@ -13,7 +13,6 @@ def unify(x, y, s):
     >>> unify(x + y, y + C, {})
     {y: C, x: y}
     """
-    #print 'Taher: ', x
     if s == None:
         return None
     elif x == y:
@@ -39,13 +38,8 @@ def is_variable(x):
     return isinstance(x, Expr) and not x.args and is_var_symbol(x.op)
 
 
-def unify_var(var, x, s):
-    # h =  s[var]
-    #print 'Hello', var
-#    if(var in s):
-#        h = s[var]
-#        print 'hashas: ', h 
-    if var in s:  #and not s[var]== var:
+def unify_var(var, x, s): 
+    if var in s:  
         return unify(s[var], x, s)
     elif occur_check(var, x) :
         return None
@@ -94,33 +88,374 @@ def subst(sentence, dic):
     >>> subst(expr('P(x,f(x),y,z)'),{x:c,y:g(u)})
     'P(c,f(c),g(u),z)'
     """
-    #print sentence.op, sentence.args, 'dict:',dic
     if not isinstance(sentence, Expr):
         return sentence
-    elif is_var_symbol(sentence.op) :#or isinstance(sentence.op, str):
+    elif is_var_symbol(sentence.op) :
         if sentence in dic:
-            #print 'in dict', sentence,dic[sentence] 
             return dic[sentence]
     return Expr(sentence.op, *[subst(a, dic) for a in sentence.args])
 
 
 
-def standardize_apart_h(sentence, dic):
-    """Replace all the variables in sentence with new variables."""
-    if not isinstance(sentence, Expr):
-        print 'here'
-        return sentence
-    elif is_var_symbol(sentence.op):
-        if sentence in dic:
-            return dic[sentence]
-        else:
-            standardize_apart_h.counter += 1
-            dic[sentence] = Expr('V_%d' % standardize_apart_h.counter)
-            return dic[sentence]
-    else:
-        return Expr(sentence.op, *[standardize_apart_h(a, dic) for a in sentence.args])
+#-------------Clause Form---------------------------
 
-standardize_apart_h.counter = 0
+def to_clause_form(s,trace= False):
+    s = to_cnf(s, trace)
+    s = disjuncts_to_clauses(s)
+    if trace: print '\nStep 9:(to Clause form)\n',s
+    s = conjuncts_to_clauses(s)
+    if trace: print '\nStep 10:(to Clause form)\n',s
+    return s
+    
+#-------------CNF---------------------------
+
+def to_cnf(s, trace = False):
+    """Convert a propositional logical sentence s to conjunctive normal form.
+    That is, of the form ((A | ~B | ...) & (B | C | ...) & ...) [p. 215]
+    >>> to_cnf("~(B|C)")
+    (~B & ~C)
+    >>> to_cnf("B <=> (P1|P2)")
+    ((~P1 | B) & (~P2 | B) & (P1 | P2 | ~B))
+    >>> to_cnf("a | (b & c) | d")
+    ((b | a | d) & (c | a | d))
+    >>> to_cnf("A & (B | (D & E))")
+    (A & (D | B) & (E | B))
+    """
+    if isinstance(s, str): s = expr(s)
+    if trace: print '\nOriginal:\n',s
+    
+    s= eliminate_equivalence(s) # Step 1
+    if trace: print '\nStep 1:(Eliminate Equivalence)\n',s
+    
+    s = eliminate_implications(s) # Steps 2
+    if trace: print '\nStep 2:(Eliminate Implication)\n',s
+    
+    s = move_not_inwards(s) # Step 3
+    if trace: print '\nStep 3:(Move not inwards)\n',s
+    
+    s = standardize_apart(s) # Step 4
+    if trace: print '\nStep 4:(Standardize apart)\n',s
+    
+    s = skolemize(s) # Step 5
+    if trace: print '\nStep 5:(Skolemize)\n',s
+    
+    s = eliminate_for_All(s) # Step 6
+    if trace: print '\nStep 6:(Eliminate for all)\n',s
+    
+    s = distribute_and_over_or(s) # Step 7,8
+    if trace: print '\nStep 7,8:(Distribute And over Or and flatten)\n',s
+     
+    return s 
+
+    
+def eliminate_equivalence(s):
+    """
+    step 1: remove equivalence
+    """
+    #print 'just here', s.args
+    if not s.args or (is_symbol(s.op) and s.op != 'All' and s.op != 'Exists') : return s     ## (Atoms are unchanged.)
+    args = map(eliminate_equivalence, s.args)
+    a, b = args[0], args[-1]
+    #print s.op
+    if s.op == '<=>':
+        #print 'eq'
+        return (a >> b) & (b >> a)
+    else:
+        return Expr(s.op, *args)
+
+
+def eliminate_implications(s):
+    """
+    step 2: remove implication
+    
+    Change >>, <<into &, |, and ~. That is, return an Expr
+    that is equivalent to s, but has only &, |, and ~ as logical operators.
+    >>> eliminate_implications(A >> (~B << C))
+    ((~B | ~C) | ~A)
+    """
+    if not s.args or (is_symbol(s.op) and s.op != 'All' and s.op != 'Exists') : return s     ## (Atoms are unchanged.)
+    args = map(eliminate_implications, s.args)
+    a, b = args[0], args[-1]
+    if s.op == '>>':
+        return (b | ~a)
+    elif s.op == '<<':
+        return (a | ~b)
+    else:
+        return Expr(s.op, *args)
+
+    
+def move_not_inwards(s):
+    """
+         step 3: push not inwards
+    """
+    if s.op == '~':
+        NOT = lambda b: move_not_inwards(~b)
+        a = s.args[0]
+        
+        if a.op =='All': 
+            return NaryExpr('Exists', *[a.args[0], NOT(a.args[1])])
+        
+        if a.op =='Exists': 
+            return NaryExpr('All', *[a.args[0], NOT(a.args[1])])
+
+        if a.op == '~': 
+#            print 'Hello from negation!'
+            return move_not_inwards(a.args[0]) # ~~A ==> A
+        if a.op =='&': 
+#            print 'Hello from AND!'
+            return NaryExpr('|', *map(NOT, a.args))
+        if a.op =='|':
+#            print 'Hello from OR!' 
+            return NaryExpr('&', *map(NOT, a.args))
+        return s
+    elif (is_symbol(s.op) or not s.args):
+#        print 'Hello from Base case!'
+        if s.op == 'All' or s.op == 'Exists':
+            return Expr(s.op, *map(move_not_inwards, s.args))
+        else:
+            return s
+    else:
+#        print 'Hello from unknown!'
+        return Expr(s.op, *map(move_not_inwards, s.args))   
+
+
+def standardize_apart(s,dic={}):
+    """
+    step 4: rename variables
+    """
+    if is_symbol(s.op) and (s.op == 'All' or s.op == 'Exists'):        
+        if s.args[0] in dic:
+            standardize_apart.counter += 1
+            dic[s.args[0]] = Expr('v%d' % standardize_apart.counter)
+        else:
+            dic[s.args[0]]= s.args[0]
+        return Expr(s.op, *[standardize_apart(a, dic) for a in s.args]) 
+    
+    if is_var_symbol(s.op):
+        if s in dic:
+            return dic[s]
+        else:
+            return s
+    else:
+        return Expr(s.op, *[standardize_apart(a, dic) for a in s.args])
+
+standardize_apart.counter = 0
+    
+
+
+def skolemize(s,qun=[],dict={}):
+    """
+    step 5: to remove exist
+    """
+    if is_symbol(s.op) and s.op == 'All':#if it's for all save the var to add to function
+        qun2=qun[:]
+        qun2.append(s.args[0])
+        return Expr(s.op,*[s.args[0],skolemize(s.args[1],qun2,dict)])
+    if  is_symbol(s.op) and s.op == 'Exists':# if it's there exists add new substitution for this var to dict 
+        if qun!=[]:
+            skolemize.__functionsCount+=1
+            f=  Expr('f%d' % skolemize.__functionsCount)
+        else:
+            skolemize.__varscount+=1
+            f=  Expr('v%d' % skolemize.__varscount)
+        dict2=dict.copy()
+        dict2[s.args[0]]=Expr(f.op,*qun)
+        return skolemize(s.args[1], qun,dict2)
+    if is_variable(s):# if variable subsititute 
+        if s in dict:
+            return dict[s]
+        else: 
+            return s
+    else:#otherwise continue with args 
+        return Expr(s.op,*map(lambda x: skolemize(x,qun,dict),s.args))
+# counters to make functions and vars unique          
+skolemize.__varscount=0
+skolemize.__functionsCount=0
+
+
+def eliminate_for_All (s):
+    """
+    step 6: elimenate For All 
+    """
+    if (not s.args or is_symbol(s.op)) and not s.op == 'All': 
+        return s     ## (Atoms are unchanged.)
+    
+    args = map(eliminate_for_All, s.args)
+    b = args[-1]
+    
+    if s.op == 'All':
+        return b
+    else:
+        return Expr(s.op, *args)
+
+
+def distribute_and_over_or(s):
+    """
+    step 7,8: distribute and over or and flaten
+    
+    Given a sentence s consisting of conjunctions and disjunctions
+    of literals, return an equivalent sentence in CNF.
+    >>> distribute_and_over_or((A & B) | C)
+    ((A | C) & (B | C))
+    """
+    if s.op == '|':
+        s = NaryExpr('|', *s.args)
+        if len(s.args) == 0:
+            return FALSE
+        if len(s.args) == 1:
+            return distribute_and_over_or(s.args[0])
+        conj = find_if((lambda d: d.op == '&'), s.args)
+        if not conj:
+            return NaryExpr(s.op, *s.args)
+        others = [a for a in s.args if a is not conj]
+        if len(others) == 1:
+            rest = others[0]
+        else:
+            rest = NaryExpr('|', *others)
+        return NaryExpr('&', *map(distribute_and_over_or,
+                                  [(c|rest) for c in conj.args]))
+    elif s.op == '&':
+        return NaryExpr('&', *map(distribute_and_over_or, s.args))
+    else:
+        return s
+
+
+def NaryExpr(op, *args):
+    """Create an Expr, but with an nary, associative op, so we can promote
+    nested instances of the same op up to the top level.
+    >>> NaryExpr('&', (A&B),(B|C),(B&C))
+    (A & B & (B | C) & B & C)
+    """
+    arglist = []
+    for arg in args:
+        if arg.op == op and not arg.op == 'Exists' and not arg.op == 'All': 
+            arglist.extend(arg.args)
+        else:            
+            arglist.append(arg)
+    if len(args) == 1:
+        return args[0]
+    elif len(args) == 0:
+        return _NaryExprTable[op]
+    else:
+        return Expr(op, *arglist)    
+
+_NaryExprTable = {'&':TRUE, '|':FALSE, '+':ZERO, '*':ONE}
+
+
+def addClause(s):
+    list = disjunction_clause(s)
+    s=conjuncts_to_clauses(s)
+    s=disjuncts_to_clauses(s)
+    return s
+
+        
+
+def disjunction_clause(s):
+    if is_symbol(s.op):
+        return s
+    else:
+        return map(disjuncts_to_clauses,s.args)
+
+
+def disjuncts_to_clauses(s):
+    """
+    step 9: listify disjunctions
+    Return a list of the disjuncts in the sentence s.
+    >>> disjuncts(A | B)
+    [A, B]
+    >>> disjuncts(A & B)
+    [(A & B)]
+    """
+    if isinstance(s, Expr) and s.op == '|':
+        return str(s.args)
+    else:
+        return Expr(s.op,*map(disjuncts_to_clauses,s.args))
+
+
+def conjuncts_to_clauses(s):
+    """
+    step 10: listify conjunctions
+    Return a list of the conjuncts in the sentence s.
+    >>> conjuncts(A & B)
+    [A, B]
+    >>> conjuncts(A | B)
+    [(A | B)]
+    """
+    if isinstance(s, Expr) and s.op == '&':
+        return s.args
+    else:
+        return Expr(s.op,*map(conjuncts_to_clauses,s.args))
+
+
+if __name__== '__main__':
+    if len(sys.argv)>2:
+        if sys.argv[1] == 'unify':
+            exp1=expr(sys.argv[2])
+            exp2=expr(sys.argv[3])
+            trace = True if int(sys.argv[4])==1 else False
+            print '\n',unify(exp1,exp2,{})
+        elif sys.argv[1] == 'toClause':
+            exp1=expr(sys.argv[2])
+            trace = True if int(sys.argv[3])==1 else False
+            print '\nmu=',to_clause_form(exp1, trace)
+    else:
+        print '\ninput should be'
+        print '[\'unify\'] \'exp1\' \'exp2\' [0 or 1 for trace] '
+        print '[\'toClause\'] \'exp1\' [0 or 1 for trace] '
+        
+ 
+#------------------------------------------------------------------------------------------------------   
+'''
+TESTING Codes
+'''
+
+
+#===============================================================================
+#===============================================================================
+#--------- Unify Testing------------------------ 
+#===============================================================================
+#===============================================================================
+#testing skolemize
+#e=expr('All(i,All(z,Exists(x ,R(i) & Exists(y,P(x,y,z)))) | Exists(y,Q(y) &E(i))) & Exists(x,Exists(y,M(x,y))) | Exists(x,All(y,M(x,y))&All(y,P(x,y)))')
+e=expr('All(x,R(x)&Exists(h,G(h,x)))|Exists(h,T(h,x))')
+
+print standardize_apart(e,{}) 
+print skolemize(e)
+
+le=expr('All(x,P(x)<=>(Q(x)|Exists(y,Q(y)&R(y,x))))')
+print to_clause_form(le,True)
+
+#print expr('Q(x) ==> P(x)')
+#y2= expr('x ==> y')
+#h= expr('z ==> l')
+#
+#m=expr('P(x,g(x),g(f(a)))')
+#n=expr('P(f(u),v,v)')
+#
+#f= unify(m, n, {})
+#print m,n, f
+#
+#m=expr('P(a,y,f(y))')
+#n=expr('P(z,z,u)')
+#
+#f= unify(m, n, {})
+#print m,n,f
+
+#
+#m = expr('P(x,g(x),x)')
+#n = expr('P(g(u),g(g(z)),z)')
+#print n.op, n.args
+#f= unify(m, n, {})
+#print m,n,f
+#
+##print f[z]
+#m = expr('P(x)')
+#n = expr('P(z)')
+#print m.args
+#
+#f= unify(m, n, {})
+#print m,n,f
+
 
 #x=expr('x')
 #s3={}
@@ -169,365 +504,11 @@ print m,n, f
 #print x
 #
 
-
-
-
-#-------------Clause Form---------------------------
-
-def to_clause_form(s,trace= False):
-    temp = to_cnf(s, trace)
-#    temp = disjuncts(temp)
-#    temp = conjuncts(temp)
-#    print temp, 'this is the temp'
-    temp =  addClause(temp)
-#    temp = disjunction_clause(s)
-    return temp
-    
-#-------------CNF---------------------------
-
-def to_cnf(s, trace = False):
-    """Convert a propositional logical sentence s to conjunctive normal form.
-    That is, of the form ((A | ~B | ...) & (B | C | ...) & ...) [p. 215]
-    >>> to_cnf("~(B|C)")
-    (~B & ~C)
-    >>> to_cnf("B <=> (P1|P2)")
-    ((~P1 | B) & (~P2 | B) & (P1 | P2 | ~B))
-    >>> to_cnf("a | (b & c) | d")
-    ((b | a | d) & (c | a | d))
-    >>> to_cnf("A & (B | (D & E))")
-    (A & (D | B) & (E | B))
-    """
-    if isinstance(s, str): s = expr(s)
-    if trace: print '\nOriginal:\n',s
-    
-    s= eliminate_equivalence(s) # Step 1
-    if trace: print '\nStep 1:(Eliminate Equivalence)\n',s
-    
-    s = eliminate_implications(s) # Steps 2
-    if trace: print '\nStep 2:(Eliminate Implication)\n',s
-    
-    s = move_not_inwards(s) # Step 3
-    if trace: print '\nStep 3:(Move not inwards)\n',s
-    
-    s = standardize_apart(s) # Step 4
-    if trace: print '\nStep 4:(Standardize apart)\n',s
-    
-    s = skolemize(s) # Step 5
-    if trace: print '\nStep 5:(Skolemize)\n',s
-    
-    s = eliminate_for_All(s) # Step 6
-    if trace: print '\nStep 6:(Eliminate for all)\n',s
-    
-    s = distribute_and_over_or(s) # Step 7,8
-    if trace: print '\nStep 7,8:(Distribute And over Or and flatten)\n',s
-    
-   
-    
-    return s 
-
-    
-def eliminate_equivalence(s):
-    """
-    step 1: remove equivalence
-    """
-    #print 'just here', s.args
-    if not s.args or (is_symbol(s.op) and s.op != 'All' and s.op != 'Exists') : return s     ## (Atoms are unchanged.)
-    args = map(eliminate_equivalence, s.args)
-    a, b = args[0], args[-1]
-    #print s.op
-    if s.op == '<=>':
-        #print 'eq'
-        return (a >> b) & (b >> a)
-    else:
-        return Expr(s.op, *args)
-
-def eliminate_implications(s):
-    """
-    step 2: remove implication
-    
-    Change >>, <<into &, |, and ~. That is, return an Expr
-    that is equivalent to s, but has only &, |, and ~ as logical operators.
-    >>> eliminate_implications(A >> (~B << C))
-    ((~B | ~C) | ~A)
-    """
-    if not s.args or (is_symbol(s.op) and s.op != 'All' and s.op != 'Exists') : return s     ## (Atoms are unchanged.)
-    args = map(eliminate_implications, s.args)
-    a, b = args[0], args[-1]
-    if s.op == '>>':
-        return (b | ~a)
-    elif s.op == '<<':
-        return (a | ~b)
-    else:
-        return Expr(s.op, *args)
-
-    
-def move_not_inwards(s):
-    """
-         step 3: push not inwards
-    """
-     
-#    print '\n'
-#    print 'Start!: ', s 
-    if s.op == '~':
-        NOT = lambda b: move_not_inwards(~b)
-        a = s.args[0]
-        
-        if a.op =='All': 
-            return NaryExpr('Exists', *[a.args[0], NOT(a.args[1])])
-        
-        if a.op =='Exists': 
-            return NaryExpr('All', *[a.args[0], NOT(a.args[1])])
-
-        if a.op == '~': 
-#            print 'Hello from negation!'
-            return move_not_inwards(a.args[0]) # ~~A ==> A
-        if a.op =='&': 
-#            print 'Hello from AND!'
-            return NaryExpr('|', *map(NOT, a.args))
-        if a.op =='|':
-#            print 'Hello from OR!' 
-            return NaryExpr('&', *map(NOT, a.args))
-        return s
-    elif (is_symbol(s.op) or not s.args):
-#        print 'Hello from Base case!'
-        if s.op == 'All' or s.op == 'Exists':
-            return Expr(s.op, *map(move_not_inwards, s.args))
-        else:
-            return s
-    else:
-#        print 'Hello from unknown!'
-        return Expr(s.op, *map(move_not_inwards, s.args))   
-
-
-def standardize_apart(s,dic={}):
-    """
-    step 4: rename variables
-    """
-   
-    if is_symbol(s.op) and (s.op == 'All' or s.op == 'Exists'):
-
-        
-        if s.args[0] in dic:
-            standardize_apart.counter += 1
-            dic[s.args[0]] = Expr('v%d' % standardize_apart.counter)
-        else:
-            dic[s.args[0]]= s.args[0]
-        return Expr(s.op, *[standardize_apart(a, dic) for a in s.args]) 
-    
-    if is_var_symbol(s.op):
-        if s in dic:
-            return dic[s]
-        else:
-            return s
-    else:
-        return Expr(s.op, *[standardize_apart(a, dic) for a in s.args])
-
-standardize_apart.counter = 0
-    
-
-
-def skolemize(s,qun=[],dict={}):
-    """
-    step 5: to remove exist
-    """
-    #print s, qun , dict
-#    if not isinstance(s, Expr):
-#        return s
-    if is_symbol(s.op) and s.op == 'All':#if it's for all save the var to add to function
-        qun2=qun[:]
-        qun2.append(s.args[0])
-        return Expr(s.op,*[s.args[0],skolemize(s.args[1],qun2,dict)])
-    if  is_symbol(s.op) and s.op == 'Exists':# if it's there exists add new substitution for this var to dict 
-        if qun!=[]:
-            skolemize.__functionsCount+=1
-            f=  Expr('f%d' % skolemize.__functionsCount)
-        else:
-            skolemize.__varscount+=1
-            f=  Expr('v%d' % skolemize.__varscount)
-        dict2=dict.copy()
-        dict2[s.args[0]]=Expr(f.op,*qun)
-        return skolemize(s.args[1], qun,dict2)
-    if is_variable(s):# if variable subsititute 
-        if s in dict:
-            return dict[s]
-        else: 
-            return s
-    else:#otherwise continue with args 
-        return Expr(s.op,*map(lambda x: skolemize(x,qun,dict),s.args))
-# counters to make functions and vars unique          
-skolemize.__varscount=0
-skolemize.__functionsCount=0
-
-#testing skolemize
-#e=expr('All(i,All(z,Exists(x ,R(i) & Exists(y,P(x,y,z)))) | Exists(y,Q(y) &E(i))) & Exists(x,Exists(y,M(x,y))) | Exists(x,All(y,M(x,y))&All(y,P(x,y)))')
-e=expr('All(x,R(x)&Exist(h,G(h,x)))|Exist(h,T(h,x))')
-#print e, e.op,e.args
-#print e
-print standardize_apart_h(e,{}) 
-print skolemize(e)
-
-
-
-def eliminate_for_All (s):
-    """
-    step 6: elimenate For All 
-    """
-#    print 'All: ' , s.op
-    
-    if (not s.args or is_symbol(s.op)) and not s.op == 'All': 
-        return s     ## (Atoms are unchanged.)
-    
-    args = map(eliminate_for_All, s.args)
-    b = args[-1]
-    
-    if s.op == 'All':
-        return b
-    else:
-        return Expr(s.op, *args)
-
-def distribute_and_over_or(s):
-    """
-    step 7,8: distribute and over or and flaten
-    
-    Given a sentence s consisting of conjunctions and disjunctions
-    of literals, return an equivalent sentence in CNF.
-    >>> distribute_and_over_or((A & B) | C)
-    ((A | C) & (B | C))
-    """
-    if s.op == '|':
-        s = NaryExpr('|', *s.args)
-        if len(s.args) == 0:
-            return FALSE
-        if len(s.args) == 1:
-            return distribute_and_over_or(s.args[0])
-        conj = find_if((lambda d: d.op == '&'), s.args)
-        if not conj:
-            return NaryExpr(s.op, *s.args)
-        others = [a for a in s.args if a is not conj]
-        if len(others) == 1:
-            rest = others[0]
-        else:
-            rest = NaryExpr('|', *others)
-        return NaryExpr('&', *map(distribute_and_over_or,
-                                  [(c|rest) for c in conj.args]))
-    elif s.op == '&':
-        return NaryExpr('&', *map(distribute_and_over_or, s.args))
-    else:
-        return s
-
-def NaryExpr(op, *args):
-    """Create an Expr, but with an nary, associative op, so we can promote
-    nested instances of the same op up to the top level.
-    >>> NaryExpr('&', (A&B),(B|C),(B&C))
-    (A & B & (B | C) & B & C)
-    """
-    arglist = []
-    for arg in args:
-        if arg.op == op and not arg.op == 'Exists' and not arg.op == 'All': 
-            arglist.extend(arg.args)
-        else:            
-            arglist.append(arg)
-    if len(args) == 1:
-        return args[0]
-    elif len(args) == 0:
-        return _NaryExprTable[op]
-    else:
-        return Expr(op, *arglist)    
-
-_NaryExprTable = {'&':TRUE, '|':FALSE, '+':ZERO, '*':ONE}
-
-
-def addClause(s):
-    list = []
-#    if is_symbol(s.op):
-#        return s
-#    if s.op == '|':
-#        args = map(addClause,s.args)
-    list = disjunction_clause(s)
-    return list
-#    print list,'this is a list'
-        
-
-def disjunction_clause(s):
-    if is_symbol(s.op):
-        return s
-    else:
-        return map(disjuncts,s.args)
-
-#Should be fixed to work like clause form
-def disjuncts(s):
-    """
-    step 9: listify disjunctions
-    Return a list of the disjuncts in the sentence s.
-    >>> disjuncts(A | B)
-    [A, B]
-    >>> disjuncts(A & B)
-    [(A & B)]
-    """
-    if isinstance(s, Expr) and s.op == '|':
-        return s.args
-    else:
-        return [s]
-
-def conjuncts(s):
-    """
-    step 10: listify conjunctions
-    Return a list of the conjuncts in the sentence s.
-    >>> conjuncts(A & B)
-    [A, B]
-    >>> conjuncts(A | B)
-    [(A | B)]
-    """
-    if isinstance(s, Expr) and s.op == '&':
-        return s.args
-    else:
-        return [s]
-
-
-le=expr('All(x,P(x)<=>(Q(x)|Exists(y,Q(y)&R(y,x))))')
-print to_clause_form(le,True)
-
-#print expr('Q(x) ==> P(x)')
-#y2= expr('x ==> y')
-#h= expr('z ==> l')
-#
-#m=expr('P(x,g(x),g(f(a)))')
-#n=expr('P(f(u),v,v)')
-#
-#f= unify(m, n, {})
-#print m,n, f
-#
-#m=expr('P(a,y,f(y))')
-#n=expr('P(z,z,u)')
-#
-#f= unify(m, n, {})
-#print m,n,f
-
-#
-#m = expr('P(x,g(x),x)')
-#n = expr('P(g(u),g(g(z)),z)')
-#print n.op, n.args
-#f= unify(m, n, {})
-#print m,n,f
-#
-##print f[z]
-#m = expr('P(x)')
-#n = expr('P(z)')
-#print m.args
-#
-#f= unify(m, n, {})
-#print m,n,f
-
 #===============================================================================
 #===============================================================================
 #---------CNF Testing------------------------ 
 #===============================================================================
 #===============================================================================
-
-
-
-
-
 
 #m = expr('x <=> y')
 #
@@ -535,14 +516,10 @@ print to_clause_form(le,True)
 #
 #print 'CNF: ', n 
 
-
-      
-
 #m = expr ('All(x, B(x) <=> Q(x))')
 #
 #print m
 #print to_clause_form(m, True)
-
 
 #===============================================================================
 # Taken from: Working right! 
@@ -626,8 +603,6 @@ print to_clause_form(le,True)
 
 #print to_clause_form(m,True)
 
-
-
 #print eliminate_for_All(m)
 
 
@@ -645,21 +620,3 @@ print to_clause_form(le,True)
 #print x
 #
 
-if __name__== '__main__':
-    if len(sys.argv)>2:
-        if sys.argv[1] == 'unify':
-            exp1=expr(sys.argv[2])
-            exp2=expr(sys.argv[3])
-            trace = True if int(sys.argv[4])==1 else False
-            print '\n',unify(exp1,exp2,{})
-        elif sys.argv[1] == 'toClause':
-            exp1=expr(sys.argv[2])
-            trace = True if int(sys.argv[3])==1 else False
-            print '\nmu=',to_clause_form(exp1, trace)
-    else:
-        print '\ninput should be'
-        print '[\'unify\'] \'exp1\' \'exp2\' [0 or 1 for trace] '
-        print '[\'toClause\'] \'exp1\' [0 or 1 for trace] '
-        
-    
- 
