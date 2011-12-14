@@ -141,6 +141,12 @@ def is_prop_symbol(s):
     TRUE or FALSE."""
     return is_symbol(s) and s[0].isupper() and s != 'TRUE' and s != 'FALSE'
 
+def is_variable(x):
+    "A variable is an Expr with no args and a lowercase symbol as the op."
+    return isinstance(x, Expr) and not x.args and is_var_symbol(x.op)
+
+
+
 
 ## Useful constant Exprs used in examples and code:
 TRUE, FALSE, ZERO, ONE, TWO = map(Expr, ['TRUE', 'FALSE', 0, 1, 2])
