@@ -3,16 +3,17 @@ import sys
 from Expr import *
 from utils import num_or_str,isnumber,issequence,find_if
 
+# allowing tracing steps
+trace= True
 
-trace= False
-
-def unify(x, y, s):
+def unify(x, y, s={}):
     """Unify expressions x,y with substitution s; return a substitution that
     would make x,y equal, or None if x,y can not unify. x and y can be
     variables (e.g. Expr('x')), constants, lists, or Exprs. [Fig. 9.1]
     >>> unify(x + y, y + C, {})
     {y: C, x: y}
     """
+    if trace: print '\nexp1:',x,' exp2:',y,' mu=',s
     if s == None:
         return None
     elif x == y:
@@ -24,27 +25,23 @@ def unify(x, y, s):
     elif isinstance(x, Expr) and isinstance(y, Expr):
         return unify(x.args, y.args, unify(x.op, y.op, s))
     elif isinstance(x, str) or isinstance(y, str) or not x or not y:
-        if x == y:
-            return s
-        else:
-            return None
+        return s if x == y else None
     elif issequence(x) and issequence(y) and len(x) == len(y):
         return unify(x[1:], y[1:], unify(x[0], y[0], s))
     else:
         return None
 
-def is_variable(x):
-    "A variable is an Expr with no args and a lowercase symbol as the op."
-    return isinstance(x, Expr) and not x.args and is_var_symbol(x.op)
-
-
 def unify_var(var, x, s): 
     if var in s:  
         return unify(s[var], x, s)
-    elif occur_check(var, x) :
-        return None
     else:
-        return extend(s, var, x)
+        t= subst(x,s)
+        #if occur_check(var, x) :
+        if occur_check(var, t) :
+            return None
+        else:
+            #return extend(s, var, x)
+            return extend(s, var, t)
 
 
 def occur_check(var, x):
@@ -68,18 +65,19 @@ def extend(s, var, val):
     """
     s2 = s.copy()
     # substitute the variables in val with the values from s2
-    t= subst(val,s2)
+    #t= subst(val,s2)
     # check if any substitution leads to a loop 
-    for sub in s2:
-        if occur_check(var, s2[sub]):
-            if occur_check(sub, val):
-                return None
+#    for sub in s2:
+#        if occur_check(var, s2[sub]):
+#            if occur_check(sub, val):
+#                return None
     #insert t in s2
-    s2[var] = t
+    #s2[var] = t
+    s2[var] = val
     # fixing values of dict according to added sub
     s2=dict(map(lambda ex: (ex,subst(s2[ex],s2)),s2))
     # in case of tracing
-    if trace: print 'mu=',s2
+    #if trace: print 'mu=',s2
     return s2
 
 
@@ -435,11 +433,11 @@ print to_clause_form(le,True)
 #f= unify(m, n, {})
 #print m,n, f
 #
-#m=expr('P(a,y,f(y))')
-#n=expr('P(z,z,u)')
+m=expr('P(a,y,f(y))')
+n=expr('P(z,z,u)')
 #
-#f= unify(m, n, {})
-#print m,n,f
+f= unify(m, n, {})
+print m,n,f
 
 #
 #m = expr('P(x,g(x),x)')
@@ -449,12 +447,12 @@ print to_clause_form(le,True)
 #print m,n,f
 #
 ##print f[z]
-#m = expr('P(x)')
-#n = expr('P(z)')
+m = expr('P(x)')
+n = expr('P(z)')
 #print m.args
 #
-#f= unify(m, n, {})
-#print m,n,f
+f= unify(m, n, {})
+print m,n,f
 
 
 #x=expr('x')
@@ -478,25 +476,25 @@ print m,n, f
 #print m,n,f
 
 
-#m = expr('P(x,g(x),x)')
-#n = expr('P(g(u),g(g(z)),z)')
+m = expr('P(x,g(x),x)')
+n = expr('P(g(u),g(g(z)),z)')
 #
-#f= unify(m, n, {})
-#print m,n,f
+f= unify(m, n)
+print m,n,f
 #
 ##print f[z]
-#m = expr('P(x)')
-#n = expr('P(f(x))')
+m = expr('P(x)')
+n = expr('P(f(x))')
 #print m.args
 #
-#f= unify(m, n, {})
-#print m,n,f
+f= unify(m, n, {})
+print m,n,f
 
-#m=expr('Q(y,g(A,B))')
-#n=expr('Q(g(x,x),y)')
+m=expr('Q(y,g(A,B))')
+n=expr('Q(g(x,x),y)')
 #
-#f= unify(m, n, {})
-#print m,n,f
+f= unify(m, n, {})
+print m,n,f
 #
 #d= unify(y2, h, {})
 #print d
