@@ -322,6 +322,7 @@ def to_clause_form(s,trace= False):
 #    temp = conjuncts(temp)
 #    print temp, 'this is the temp'
     temp =  addClause(temp)
+#    temp = disjunction_clause(s)
     return temp
     
 #-------------CNF---------------------------
@@ -382,7 +383,6 @@ def addClause(s):
 
 def disjunction_clause(s):
     if is_symbol(s.op):
-        print s
         return s
     else:
         return map(disjuncts,s.args)
@@ -750,12 +750,13 @@ def conjuncts(s):
 #
 #print 'Negation in There Exists: ', notm
 #
-m = expr ('~(Exists (x, All(y, P(x) | M(x, y) )))')
+#m = expr ('~(Exists (x, All(y, P(x) | M(x, y) )))')
 #print '\nExpression to negate: ', m
 #notm = move_not_inwards(m)
 #
 #print 'Negation in There Exists with For all: ', notm
 
+m = expr ('Exists(x,(P(x)&Q(y))>>R(x))')
 
 #print 'Removing negation: ', test3_h(notm)
 
