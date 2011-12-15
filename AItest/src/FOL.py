@@ -1,7 +1,7 @@
 
 import sys
 from Expr import *
-from utils import issequence,find_if
+from utils import issequence, find_if
 
 # allowing tracing steps
 trace= True
@@ -251,7 +251,7 @@ def move_not_inwards(s):
 
 def standardize_apart(s,dic={}):
     """
-    step 4: rename variables
+    step 4: Rename variables
     """
     if is_symbol(s.op) and (s.op == 'All' or s.op == 'Exists'):        
         if s.args[0] in dic:
@@ -275,7 +275,7 @@ standardize_apart.counter = 0
 
 def skolemize(s,qun=[],dic={}):
     """
-    step 5: to remove exist
+    step 5: Removing Exists operator
     """
     if is_symbol(s.op) and s.op == 'All':#if it's for all save the var to add to function
         qun2=qun[:]
