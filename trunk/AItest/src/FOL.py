@@ -199,9 +199,9 @@ def move_not_inwards(s):
     if operator = '~'
         then we return the argument itself since ~~A = A
     if operator = '&'
-        then we return a Nary expression by distibuting the | on the list of arguments of a
+        then we return a Nary expression by distributing the | on the list of arguments of a
     if operator = '|'
-        then we return a Nary expression by distibuting the & on the list of arguments of a
+        then we return a Nary expression by distributing the & on the list of arguments of a
         
     if the operator is a symbol or s.args is false
         then we check if the the one of our reserved operators (All or Exists), then
