@@ -2,6 +2,7 @@
 import sys
 from Expr import *
 from utils import issequence, find_if
+from reportlab.graphics.widgets.markers import isSymbol
 
 # allowing tracing steps
 trace= True
@@ -94,6 +95,8 @@ def to_clause_form(s,trace= False):
     if trace: print '\nStep 9:(to Clause form)\n',s
     s = conjuncts_to_clauses(s)
     if trace: print '\nStep 10:(to Clause form)\n',s
+    s= clause_form_standardize_apart(s)
+    if trace: print '\nStep 11:(Clause form renaming)\n',s,'\n\n Final Result:'
     return s
     
 #-------------CNF---------------------------
@@ -311,7 +314,6 @@ def eliminate_for_All (s):
         
     """
     
-    
     if (not s.args or is_symbol(s.op)) and not s.op == 'All': 
         return s     ## (Atoms are unchanged.)
     
@@ -395,20 +397,6 @@ def NaryExpr(op, *args):
 _NaryExprTable = {'&':TRUE, '|':FALSE, '+':ZERO, '*':ONE}
 
 
-def addClause(s):
-#    list = disjunction_clause(s)
-    s=conjuncts_to_clauses(s)
-    s=disjuncts_to_clauses(s)
-    return s
-
-        
-
-def disjunction_clause(s):
-    if is_symbol(s.op):
-        return s
-    else:
-        return map(disjuncts_to_clauses,s.args)
-
 
 def disjuncts_to_clauses(s):
     """
@@ -439,6 +427,48 @@ def conjuncts_to_clauses(s):
     else:
         return Expr(s.op,*map(conjuncts_to_clauses,s.args))
 
+def clause_form_standardize_apart(cf):   
+    """
+    Step 11: rename the variable in each clause such the same name does not appear in to clauses
+    """ 
+    #output list
+    out_clause=[]
+    #collect variable used in previous clauses to rename the repeated only 
+    global_dic=[]
+    #loop on conjunctions clauses
+    for dis in cf:
+        # initialize local dictionary for each disjunction clause
+        local_dic={}  
+        # call rename on each expr in disjunction clauses
+        out_clause.append( map(lambda exp: rename(exp,local_dic,global_dic),dis))
+    return out_clause
+
+def rename(exp,local_dic,global_dic):
+    """
+    renaming helper for each expr
+    """
+    # if it is variable 
+    if is_variable(exp):
+        # if it's not in the local dict define it to be used
+        if not exp in local_dic:
+            # if it's in the local dict define ne variable name
+            if exp in global_dic:
+                rename.count+=1
+                local_dic[exp]=Expr('x%d' % rename.count)
+            else:
+            # not in global so we can use the original variable name
+                global_dic.append(exp)
+                local_dic[exp]=exp
+        return local_dic[exp] 
+    elif isSymbol(exp):
+        # if it's not avar nut sympol predicate or function apply rename on functions
+        return Expr(exp.op,*[rename(a, local_dic,global_dic) for a in exp.args])
+    else :
+        # otherwise if it's Constant return it
+        return exp
+    
+            
+rename.count=0
 
 if __name__== '__main__':
     if len(sys.argv)>2:
