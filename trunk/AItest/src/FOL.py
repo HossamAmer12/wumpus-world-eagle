@@ -14,7 +14,7 @@ def unify(x, y, s={}):
     >>> unify(x + y, y + C, {})
     {y: C, x: y}
     """
-    if trace: print '\nexp1:',x,' exp2:',y,' mu=',s
+    if trace: print '\nexp1:',x,' exp2:',y,' mu = ',s
     if s == None:
         return None
     elif x == y:
