@@ -237,31 +237,31 @@ standardize_apart.counter = 0
     
 
 
-def skolemize(s,qun=[],dict={}):
+def skolemize(s,qun=[],dic={}):
     """
     step 5: to remove exist
     """
     if is_symbol(s.op) and s.op == 'All':#if it's for all save the var to add to function
         qun2=qun[:]
         qun2.append(s.args[0])
-        return Expr(s.op,*[s.args[0],skolemize(s.args[1],qun2,dict)])
-    if  is_symbol(s.op) and s.op == 'Exists':# if it's there exists add new substitution for this var to dict 
+        return Expr(s.op,*[s.args[0],skolemize(s.args[1],qun2,dic)])
+    if  is_symbol(s.op) and s.op == 'Exists':# if it's there exists add new substitution for this var to dic 
         if qun!=[]:
             skolemize.__functionsCount+=1
             f=  Expr('f%d' % skolemize.__functionsCount)
         else:
             skolemize.__varscount+=1
             f=  Expr('v%d' % skolemize.__varscount)
-        dict2=dict.copy()
+        dict2=dic.copy()
         dict2[s.args[0]]=Expr(f.op,*qun)
         return skolemize(s.args[1], qun,dict2)
     if is_variable(s):# if variable substitute 
-        if s in dict:
-            return dict[s]
+        if s in dic:
+            return dic[s]
         else: 
             return s
     else:#otherwise continue with args 
-        return Expr(s.op,*map(lambda x: skolemize(x,qun,dict),s.args))
+        return Expr(s.op,*map(lambda x: skolemize(x,qun,dic),s.args))
 # counters to make functions and vars unique          
 skolemize.__varscount=0
 skolemize.__functionsCount=0
