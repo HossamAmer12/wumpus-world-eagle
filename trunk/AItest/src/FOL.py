@@ -20,7 +20,7 @@ def unify(x, y, s={}):
     >>> unify(P(x,y), P(a,b), {})
     {y: b, x: a}
     """
-    if trace: print '\nexp1:',x,' exp2:',y,' mu = ',s
+    if trace: print 'exp1:',x,' exp2:',y,' mu = ',s,'\n'
     if s == None:
         return None
     elif x == y:
@@ -113,15 +113,11 @@ def to_clause_form(s,trace= False):
     # convert to cnf first
     s = to_cnf(s, trace)
     
-    #convert to clause form
-    s = disjuncts_to_clauses(s)
+    s = cnf_to_clauses(s)
     if trace: print '\nStep 9:(to Clause form)\n',s
     
-    s = conjuncts_to_clauses(s)
-    if trace: print '\nStep 10:(to Clause form)\n',s
-    
     s= clause_form_standardize_apart(s)
-    if trace: print '\nStep 11:(Clause form renaming)\n',s,'\n\n Final Result:'
+    if trace: print '\nStep 10:(Clause form renaming)\n',s,'\n\nFinal Result:'
     return s
     
 #-------------CNF---------------------------
@@ -270,20 +266,22 @@ def standardize_apart(s,dic={}):
     """
     step 4: Rename variables
     """
+    #when hitting exist or all rename its variable and add it to dictionary 
     if is_symbol(s.op) and (s.op == 'All' or s.op == 'Exists'):        
         if s.args[0] in dic:
             standardize_apart.counter += 1
-            dic[s.args[0]] = Expr('x%d' % standardize_apart.counter)
+            dic[s.args[0]] = Expr('s%d' % standardize_apart.counter)
         else:
             dic[s.args[0]]= s.args[0]
         return Expr(s.op, *[standardize_apart(a, dic) for a in s.args]) 
-    
+    #if it hits variable it subst it from dictionary if it's exists
     if is_variable(s):
         if s in dic:
             return dic[s]
         else:
             return s
     else:
+        # otherwise continue recursion
         return Expr(s.op, *[standardize_apart(a, dic) for a in s.args])
 
 standardize_apart.counter = 0
@@ -294,15 +292,15 @@ def skolemize(s,qun=[],dic={}):
     """
     step 5: Removing Exists operator
     """
-    if is_symbol(s.op) and s.op == 'All':#if it's for all save the var to add to function
+    if is_symbol(s.op) and s.op == 'All':#if it's for all save the var to add to function argument
         qun2=qun[:]
         qun2.append(s.args[0])
         return Expr(s.op,*[s.args[0],skolemize(s.args[1],qun2,dic)])
     if  is_symbol(s.op) and s.op == 'Exists':# if it's there exists add new substitution for this var to dic 
-        if qun!=[]:
+        if qun!=[]:# if it was in expression of 1 or more for all
             skolemize.__functionsCount+=1
             f=  Expr('f%d' % skolemize.__functionsCount)
-        else:
+        else:# if it is not in for all 
             skolemize.__varscount+=1
             f=  Expr('z%d' % skolemize.__varscount)
         dict2=dic.copy()
@@ -446,7 +444,7 @@ _NaryExprTable = {'&':TRUE, '|':FALSE, '+':ZERO, '*':ONE}
 
 
 
-def disjuncts_to_clauses(s):
+def cnf_to_clauses(s):
     """
     step 9: listify disjunctions
     Return a list of the disjuncts in the sentence s.
@@ -457,15 +455,13 @@ def disjuncts_to_clauses(s):
     """
     # if and go to next depth
     if isinstance(s, Expr) and s.op == '&':
-        return Expr(s.op,*map(disjuncts_to_clauses,s.args))
-    # if or return the or arguments
-    elif isinstance(s, Expr) and s.op == '|':
-        return str(s.args)
+        return map(lambda x:disjuncts_to_clauses(x),s.args)
     else:
-        #if on element put it in list and return
-        return str([s])
+        return [disjuncts_to_clauses(s)]
+       
     
-def conjuncts_to_clauses(s):
+    
+def disjuncts_to_clauses(s):
     """
     step 10: listify conjunctions
     Return a list of the conjuncts in the sentence s.
@@ -474,7 +470,7 @@ def conjuncts_to_clauses(s):
     >>> conjuncts(A | B)
     [(A | B)]
     """
-    if isinstance(s, Expr) and s.op == '&':
+    if isinstance(s, Expr) and s.op == '|':
         return s.args
     else:
         return [s]
@@ -512,17 +508,17 @@ def rename(exp,local_dic,global_dic):
                 global_dic.append(exp)
                 local_dic[exp]=exp
         return local_dic[exp] 
-    elif is_symbol(exp.op):
-        print 
-        # if it's not avar nut sympol predicate or function apply rename on functions
+    else:
+        # if it's not a var but symbol predicate or function apply rename on functions
         return Expr(exp.op,*[rename(a, local_dic,global_dic) for a in exp.args])
-    else :
-        # otherwise if it's Constant return it
-        return exp
+    
     
             
 rename.count=0
 
+"""
+Main Method to run from Terminal
+"""
 if __name__== '__main__':
     if len(sys.argv)>2:
         if sys.argv[1] == 'unify':
@@ -535,15 +531,24 @@ if __name__== '__main__':
             trace = True if int(sys.argv[3])==1 else False
             print '\nmu=',to_clause_form(exp1, trace)
     else:
-        print '\ninput should be'
+        print '\nTo run from terminal input should be'
         print '[\'unify\'] \'exp1\' \'exp2\' [0 or 1 for trace] '
-        print '[\'toClause\'] \'exp1\' [0 or 1 for trace] '
+        print '[\'toClause\'] \'exp1\' [0 or 1 for trace] \n\n'
         
  
 #------------------------------------------------------------------------------------------------------   
+
 '''
 TESTING Codes
 '''
+"""
+to set the trace mode
+"""
+trace=False 
+
+m=expr('P(x,g(x),g(f(a)))&E(x)')
+print to_clause_form(m,True)
+
 
 
 #===============================================================================
@@ -551,6 +556,23 @@ TESTING Codes
 #--------- Unify Testing------------------------ 
 #===============================================================================
 #===============================================================================
+"""
+m=expr('P(x,g(x),g(f(a)))')
+n=expr('P(f(u),v,v)')
+f= unify(m, n, {})
+print '\n',m,n, f
+
+m=expr('P(a,y,f(y))')
+n=expr('P(z,z,u)')
+f= unify(m, n, {})
+print '\n',m,n,f
+
+m = expr('P(x,g(x),x)')
+n = expr('P(g(u),g(g(z)),z)')
+f= unify(m, n, {})
+print '\n',m,n,f
+"""
+
 #testing skolemize
 #e=expr('All(i,All(z,Exists(x ,R(i) & Exists(y,P(x,y,z)))) | Exists(y,Q(y) &E(i))) & Exists(x,Exists(y,M(x,y))) | Exists(x,All(y,M(x,y))&All(y,P(x,y)))')
 #e=expr('All(x,R(x)&Exists(h,G(h,x)))|Exists(h,T(h,x))')
@@ -564,44 +586,12 @@ TESTING Codes
 ##print expr('Q(x) ==> P(x)')
 ##y2= expr('x ==> y')
 ##h= expr('z ==> l')
-##
-##m=expr('P(x,g(x),g(f(a)))')
-##n=expr('P(f(u),v,v)')
-##
-##f= unify(m, n, {})
-##print m,n, f
-##
-#m=expr('P(a,y,f(y))')
-#n=expr('P(z,z,u)')
-##
+
+
+#
 #f= unify(m, n, {})
 #print m,n,f
 #
-##
-##m = expr('P(x,g(x),x)')
-##n = expr('P(g(u),g(g(z)),z)')
-##print n.op, n.args
-##f= unify(m, n, {})
-##print m,n,f
-##
-###print f[z]
-m = expr('P(x)&Q(x)')
-print conjuncts_to_clauses(m)
-#n = expr('P(z)')
-##print m.args
-##
-#f= unify(m, n, {})
-#print m,n,f
-#
-#
-##x=expr('x')
-##s3={}
-##s3[x]=expr('c')
-##print subst(expr('P(x,f(g(x)),f(v))'), s3)
-##print expr('Q(x) ==> P(x)')
-##y2= expr('x ==> y')
-##h= expr('z ==> l')
-##
 #m=expr('P(x,g(x),g(f(a)))')
 #n=expr('P(f(u),v,v)')
 #
@@ -646,10 +636,13 @@ print conjuncts_to_clauses(m)
 ##---------CNF Testing------------------------ 
 ##===============================================================================
 ##===============================================================================
-#
+
+le=expr('All(x,P(x)<=>(Q(x)|Exists(y,Q(y)&R(y,x))))')
+print to_clause_form(le,True)
+
 
 m = expr('Exists(x,P(x) & All(x,Q(x) >> ~P(x)))')
-to_clause_form(m, True)
+print to_clause_form(m, trace)
 
 ##m = expr('x <=> y')
 ##
