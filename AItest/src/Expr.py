@@ -3,7 +3,7 @@
 
 import re
 
-from utils import num_or_str,isnumber,issequence,find_if
+from utils import num_or_str,isnumber
 
 class Expr:
     """A symbolic mathematical expression.  We use this class for logical

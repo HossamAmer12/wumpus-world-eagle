@@ -1,7 +1,7 @@
 
 import sys
 from Expr import *
-from utils import num_or_str,isnumber,issequence,find_if
+from utils import issequence,find_if
 
 # allowing tracing steps
 trace= True
