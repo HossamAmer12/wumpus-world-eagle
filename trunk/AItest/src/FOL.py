@@ -541,37 +541,33 @@ if __name__== '__main__':
 '''
 TESTING Codes
 '''
+
 """
 to set the trace mode
 """
-trace=False 
-
-#m=expr('P(x,g(x),g(f(a)))&E(x)')
-#print to_clause_form(m,True)
-
-
+trace=True 
 
 #===============================================================================
 #===============================================================================
 #--------- Unify Testing------------------------ 
 #===============================================================================
 #===============================================================================
-"""
+
 m=expr('P(x,g(x),g(f(a)))')
 n=expr('P(f(u),v,v)')
 f= unify(m, n, {})
-print '\n',m,n, f
+print m,n, f,'\n'
 
 m=expr('P(a,y,f(y))')
 n=expr('P(z,z,u)')
 f= unify(m, n, {})
-print '\n',m,n,f
+print m,n,f,'\n'
 
 m = expr('P(x,g(x),x)')
 n = expr('P(g(u),g(g(z)),z)')
 f= unify(m, n, {})
-print '\n',m,n,f
-"""
+print  m,n,f,'\n'
+
 
 #testing skolemize
 #e=expr('All(i,All(z,Exists(x ,R(i) & Exists(y,P(x,y,z)))) | Exists(y,Q(y) &E(i))) & Exists(x,Exists(y,M(x,y))) | Exists(x,All(y,M(x,y))&All(y,P(x,y)))')
@@ -638,13 +634,10 @@ print '\n',m,n,f
 ##===============================================================================
 
 le=expr('Exists(x,P(x) & All(x,Q(x)>>~P(x)))')
-print to_clause_form(le,trace)
-
-
-
+print to_clause_form(le,trace),'\n'
 
 m = expr('All(x,P(x)<=>(Q(x) & Exists(y,Q(y) & R(y,x))))')
-print to_clause_form(m, trace)
+print to_clause_form(m, trace),'\n'
 
 ##m = expr('x <=> y')
 ##
