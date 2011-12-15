@@ -1,34 +1,38 @@
 \relax 
-\newlabel{chap:assign1}{{}{1}{\relax }{Doc-Start}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {1.1}Unification}{1}{section.1.1}}
-\newlabel{unificationMethod}{{1.1}{1}{Unification\relax }{section.1.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.1.1}Unification Methods}{1}{subsection.1.1.1}}
-\@writefile{toc}{\contentsline {subsubsection}{unify(expression, expression, $\mu $)}{1}{section*.2}}
-\@writefile{toc}{\contentsline {subsubsection}{is\_variable(expression)}{1}{section*.3}}
-\@writefile{toc}{\contentsline {subsubsection}{is\_var\_symbol(String)}{1}{section*.4}}
-\@writefile{toc}{\contentsline {subsubsection}{unify\_var(variable,expression,$\mu $)}{2}{section*.5}}
-\@writefile{toc}{\contentsline {subsubsection}{occur\_check(variable, expression)}{2}{section*.6}}
-\@writefile{toc}{\contentsline {subsubsection}{extend($\mu $, variable, value) }{2}{section*.7}}
-\@writefile{toc}{\contentsline {subsubsection}{subst(expression,dictionary)}{2}{section*.8}}
-\@writefile{toc}{\contentsline {section}{\numberline {1.2}Clausal Form}{2}{section.1.2}}
-\@writefile{toc}{\contentsline {subsubsection}{to\_clause\_form(expression, trace)}{3}{section*.9}}
-\@writefile{toc}{\contentsline {subsubsection}{to\_cnf(expression,trace)}{3}{section*.10}}
-\@writefile{toc}{\contentsline {subsubsection}{eliminate\_equivalence(expression)}{3}{section*.11}}
-\@writefile{toc}{\contentsline {subsubsection}{eliminate\_implications(expression)}{3}{section*.12}}
-\@writefile{toc}{\contentsline {subsubsection}{move\_not\_inwards(expression)}{4}{section*.13}}
-\@writefile{toc}{\contentsline {subsubsection}{standardize\_apart(expression,dictionary)}{4}{section*.14}}
-\@writefile{toc}{\contentsline {subsubsection}{skolemize(expression,qun=[],dict={})}{4}{section*.15}}
-\@writefile{toc}{\contentsline {subsubsection}{eliminate\_for\_All (s)}{4}{section*.16}}
-\@writefile{toc}{\contentsline {subsubsection}{distribute\_and\_over\_or(expression)}{4}{section*.17}}
-\@writefile{toc}{\contentsline {subsubsection}{NaryExpr(operator, expressions)}{4}{section*.18}}
-\@writefile{toc}{\contentsline {subsubsection}{disjuncts(expression)}{4}{section*.19}}
-\@writefile{toc}{\contentsline {subsubsection}{addClause(expression)}{5}{section*.20}}
-\@writefile{toc}{\contentsline {subsubsection}{disjunction\_clause(expression)}{5}{section*.21}}
-\@writefile{toc}{\contentsline {section}{\numberline {1.3}References}{5}{section.1.3}}
+\newlabel{chap:assign1}{{}{1}{\relax }{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.1}Expression}{1}{section.1.1}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.2}Unification}{1}{section.1.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2.1}Unification Implementation}{2}{subsection.1.2.1}}
+\newlabel{unificationMethod}{{1.2.1}{2}{Unification Implementation\relax }{subsection.1.2.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2.2}Unification Methods}{2}{subsection.1.2.2}}
+\@writefile{toc}{\contentsline {subsubsection}{unify(expression, expression, $\mu $)}{2}{section*.3}}
+\@writefile{toc}{\contentsline {subsubsection}{is\_variable(expression)}{2}{section*.4}}
+\@writefile{toc}{\contentsline {subsubsection}{is\_var\_symbol(String)}{2}{section*.5}}
+\@writefile{toc}{\contentsline {subsubsection}{unify\_var(variable,expression,$\mu $)}{3}{section*.6}}
+\@writefile{toc}{\contentsline {subsubsection}{occur\_check(variable, expression)}{3}{section*.7}}
+\@writefile{toc}{\contentsline {subsubsection}{extend($\mu $, variable, value) }{3}{section*.8}}
+\@writefile{toc}{\contentsline {subsubsection}{subst(expression,dictionary)}{3}{section*.9}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.3}Clausal Form}{3}{section.1.3}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.4}Clausal Form Implementation}{4}{section.1.4}}
+\@writefile{toc}{\contentsline {subsubsection}{to\_clause\_form(expression, trace)}{5}{section*.10}}
+\@writefile{toc}{\contentsline {subsubsection}{to\_cnf(expression,trace)}{5}{section*.11}}
+\@writefile{toc}{\contentsline {subsubsection}{eliminate\_equivalence(expression)}{5}{section*.12}}
+\@writefile{toc}{\contentsline {subsubsection}{eliminate\_implications(expression)}{5}{section*.13}}
+\@writefile{toc}{\contentsline {subsubsection}{move\_not\_inwards(expression)}{5}{section*.14}}
+\@writefile{toc}{\contentsline {subsubsection}{standardize\_apart(expression,dictionary)}{5}{section*.15}}
+\@writefile{toc}{\contentsline {subsubsection}{skolemize(expression,qun=[],dict={})}{6}{section*.16}}
+\@writefile{toc}{\contentsline {subsubsection}{eliminate\_for\_All (s)}{6}{section*.17}}
+\@writefile{toc}{\contentsline {subsubsection}{distribute\_and\_over\_or(expression)}{6}{section*.18}}
+\@writefile{toc}{\contentsline {subsubsection}{NaryExpr(operator, expressions)}{6}{section*.19}}
+\@writefile{toc}{\contentsline {subsubsection}{disjuncts(expression)}{6}{section*.20}}
+\@writefile{toc}{\contentsline {subsubsection}{disjuncts\_to\_clauses(expression)}{7}{section*.21}}
+\@writefile{toc}{\contentsline {subsubsection}{conjuncts\_to\_clauses(expression)}{7}{section*.22}}
+\@writefile{toc}{\contentsline {subsubsection}{disjunction\_clause(expression)}{7}{section*.23}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.5}Running The Code}{7}{section.1.5}}
 \@setckpt{assign1}{
-\setcounter{page}{6}
+\setcounter{page}{8}
 \setcounter{equation}{0}
-\setcounter{enumi}{2}
+\setcounter{enumi}{8}
 \setcounter{enumii}{0}
 \setcounter{enumiii}{0}
 \setcounter{enumiv}{0}
@@ -36,14 +40,14 @@
 \setcounter{mpfootnote}{0}
 \setcounter{part}{0}
 \setcounter{chapter}{1}
-\setcounter{section}{3}
+\setcounter{section}{5}
 \setcounter{subsection}{0}
 \setcounter{subsubsection}{0}
 \setcounter{paragraph}{0}
 \setcounter{subparagraph}{0}
 \setcounter{figure}{0}
 \setcounter{table}{0}
-\setcounter{float@type}{16}
+\setcounter{float@type}{8}
 \setcounter{ContinuedFloat}{0}
 \setcounter{KVtest}{0}
 \setcounter{subfigure}{0}
@@ -52,17 +56,8 @@
 \setcounter{subtable}{0}
 \setcounter{subtable@save}{0}
 \setcounter{lotdepth}{1}
-\setcounter{@pps}{0}
-\setcounter{@ppsavesec}{0}
-\setcounter{@ppsaveapp}{0}
-\setcounter{Item}{10}
+\setcounter{Item}{15}
 \setcounter{Hfootnote}{0}
-\setcounter{bookmark@seq@number}{4}
-\setcounter{ALC@unique}{0}
-\setcounter{ALC@line}{0}
-\setcounter{ALC@rem}{0}
-\setcounter{ALC@depth}{0}
-\setcounter{algorithm}{0}
 \setcounter{lstnumber}{1}
 \setcounter{section@level}{1}
 \setcounter{lstlisting}{0}
