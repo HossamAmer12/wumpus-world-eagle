@@ -7,41 +7,52 @@ from utils import issequence, find_if
 # allowing tracing steps
 trace= True
 
+"""
+-------------------------------------------------------------
+Clause Form
+------------------------------------------------------------
+"""
+
 def unify(x, y, s={}):
     """Unify expressions x,y with substitution s; return a substitution that
     would make x,y equal, or None if x,y can not unify. x and y can be
     variables (e.g. Expr('x')), constants, lists, or Exprs. [Fig. 9.1]
-    >>> unify(x + y, y + C, {})
-    {y: C, x: y}
+    >>> unify(P(x,y), P(a,b), {})
+    {y: b, x: a}
     """
     if trace: print '\nexp1:',x,' exp2:',y,' mu = ',s
     if s == None:
         return None
     elif x == y:
         return s
+    # if any of therm is variable unify it with it's correspondent
     elif is_variable(x):
         return unify_var(x, y, s)
     elif is_variable(y):
         return unify_var(y, x, s)
+    #if they are expression
     elif isinstance(x, Expr) and isinstance(y, Expr):
         return unify(x.args, y.args, unify(x.op, y.op, s))
+    # if atom
     elif isinstance(x, str) or isinstance(y, str) or not x or not y:
         return s if x == y else None
+    # continue unification
     elif issequence(x) and issequence(y) and len(x) == len(y):
         return unify(x[1:], y[1:], unify(x[0], y[0], s))
     else:
         return None
 
 def unify_var(var, x, s): 
+    # if the variable in our mu
     if var in s:  
         return unify(s[var], x, s)
     else:
+        # if not just substitute it 
         t= subst(x,s)
-        #if occur_check(var, x) :
         if occur_check(var, t) :
             return None
         else:
-            #return extend(s, var, x)
+            # if every thing ok add it to mu
             return extend(s, var, t)
 
 
@@ -49,10 +60,13 @@ def occur_check(var, x):
     """
     Return true if var occurs anywhere in x.
     """    
+    # if both are equal
     if var == x:
         return True
+    #if they are not and one the operands are equal or it's in occures in its variables 
     elif isinstance(x, Expr):
         return var.op == x.op or occur_check(var, x.args)
+    # if it's list of arguments check every one
     elif not isinstance(x, str) and issequence(x):
         for xi in x:
             if occur_check(var, xi): return True
@@ -66,10 +80,8 @@ def extend(s, var, val):
     """
     s2 = s.copy()
     s2[var] = val
-    # fixing values of dict according to added sub
+    # fix previous substitution 
     s2=dict(map(lambda ex: (ex,subst(s2[ex],s2)),s2))
-    # in case of tracing
-    #if trace: print 'mu=',s2
     return s2
 
 
@@ -78,23 +90,36 @@ def subst(sentence, dic):
     >>> subst(expr('P(x,f(x),y,z)'),{x:c,y:g(u)})
     'P(c,f(c),g(u),z)'
     """
+    # if not expr return it
     if not isinstance(sentence, Expr):
         return sentence
+    # if variable check if it has substitution
     elif is_var_symbol(sentence.op) :
         if sentence in dic:
             return dic[sentence]
+    #otherwise try to substitute in arguments
     return Expr(sentence.op, *[subst(a, dic) for a in sentence.args])
 
 
 
-#-------------Clause Form---------------------------
+"""
+-------------------------------------------------------------
+Clause Form
+------------------------------------------------------------
+"""
+
 
 def to_clause_form(s,trace= False):
+    # convert to cnf first
     s = to_cnf(s, trace)
+    
+    #convert to clause form
     s = disjuncts_to_clauses(s)
     if trace: print '\nStep 9:(to Clause form)\n',s
+    
     s = conjuncts_to_clauses(s)
     if trace: print '\nStep 10:(to Clause form)\n',s
+    
     s= clause_form_standardize_apart(s)
     if trace: print '\nStep 11:(Clause form renaming)\n',s,'\n\n Final Result:'
     return s
@@ -144,13 +169,12 @@ def eliminate_equivalence(s):
     """
     step 1: remove equivalence
     """
-    #print 'just here', s.args
+    # in case of for all and exist go inside it
     if not s.args or (is_symbol(s.op) and s.op != 'All' and s.op != 'Exists') : return s     ## (Atoms are unchanged.)
     args = map(eliminate_equivalence, s.args)
     a, b = args[0], args[-1]
-    #print s.op
+    # if equal seperate it
     if s.op == '<=>':
-        #print 'eq'
         return (a >> b) & (b >> a)
     else:
         return Expr(s.op, *args)
@@ -215,8 +239,6 @@ def move_not_inwards(s):
         on the arguments of this given expression.
      
    """
-   
-    
     if s.op == '~':
         NOT = lambda b: move_not_inwards(~b)
         a = s.args[0]
@@ -281,7 +303,7 @@ def skolemize(s,qun=[],dic={}):
             f=  Expr('f%d' % skolemize.__functionsCount)
         else:
             skolemize.__varscount+=1
-            f=  Expr('v%d' % skolemize.__varscount)
+            f=  Expr('z%d' % skolemize.__varscount)
         dict2=dic.copy()
         dict2[s.args[0]]=Expr(f.op,*qun)
         return skolemize(s.args[1], qun,dict2)
@@ -359,9 +381,7 @@ def distribute_and_over_or(s):
       If the operator is neither & nor |:
           Therefore, we hit a base case and we return the given expression in a
           sum of products fashion.
-    """
-    
-    
+    """   
     if s.op == '|':
         s = NaryExpr('|', *s.args)
         if len(s.args) == 0:
