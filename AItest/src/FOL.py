@@ -184,7 +184,7 @@ def eliminate_implications(s):
     
 def move_not_inwards(s):
     """
-         step 3: push not inwards
+         step 3: Push not inwards for a given expression s
     """
     if s.op == '~':
         NOT = lambda b: move_not_inwards(~b)
@@ -197,17 +197,13 @@ def move_not_inwards(s):
             return NaryExpr('All', *[a.args[0], NOT(a.args[1])])
 
         if a.op == '~': 
-#            print 'Hello from negation!'
             return move_not_inwards(a.args[0]) # ~~A ==> A
         if a.op =='&': 
-#            print 'Hello from AND!'
             return NaryExpr('|', *map(NOT, a.args))
         if a.op =='|':
-#            print 'Hello from OR!' 
             return NaryExpr('&', *map(NOT, a.args))
         return s
     elif (is_symbol(s.op) or not s.args):
-#        print 'Hello from Base case!'
         if s.op == 'All' or s.op == 'Exists':
             return Expr(s.op, *map(move_not_inwards, s.args))
         else:
@@ -273,7 +269,7 @@ skolemize.__functionsCount=0
 
 def eliminate_for_All (s):
     """
-    step 6: elimenate For All 
+    step 6: Eliminates For All operator for a given expression s 
     """
     if (not s.args or is_symbol(s.op)) and not s.op == 'All': 
         return s     ## (Atoms are unchanged.)
@@ -289,7 +285,7 @@ def eliminate_for_All (s):
 
 def distribute_and_over_or(s):
     """
-    step 7,8: distribute and over or and flaten
+    step 7,8: distribute and over or and flatten
     
     Given a sentence s consisting of conjunctions and disjunctions
     of literals, return an equivalent sentence in CNF.
