@@ -184,12 +184,49 @@ def eliminate_implications(s):
     
 def move_not_inwards(s):
     """
-         step 3: Push not inwards for a given expression s
+         Step 3: Push not inwards for a given expression s
     """
+    """   
+    If I had a not operator, I make a function NOT to move the not into all the 
+    expression (called b). 
+    We take the first argument of the expression.
+    We check on its operator.
+    
+    if operator = 'All'
+        then we return a Nary expression by distributing the Exists on the first argument 
+        of the All and the not of the second argument. We do that, since the first argument
+        of the All is the quantifying variable, while the 2nd argument is the expression
+        quantified. We distribute the Exists since the inverse of All is Exists.
+    if operator = 'Exists'
+        then we return a Nary expression by distributing the All on the first argument 
+        of the Exists and the not of the second argument. We do that, since the first argument
+        of the Exists is the quantifying variable, while the 2nd argument is the expression
+        quantified. We distribute the All since the inverse of Exists is All.
+    if operator = '~'
+        then we return the argument itself since ~~A = A
+    if operator = '&'
+        then we return a Nary expression by distibuting the | on the list of arguments of a
+    if operator = '|'
+        then we return a Nary expression by distibuting the & on the list of arguments of a
+        
+    if the operator is a symbol or s.args is false
+        then we check if the the one of our reserved operators (All or Exists), then
+        we return an Expression with the operator and mapping the NOT on the rest of 
+        the expression. This is done to push a not inwards for an expression that has 
+        already a not inside All. On the other hand, if is a normal operator, we return the 
+        expression s, reaching a base case.
+    
+    if the operator is not a symbol
+        We again return an Expression with the operator and mapping the NOT function
+        on the arguments of this given expression.
+     
+   """
+   
+    
     if s.op == '~':
         NOT = lambda b: move_not_inwards(~b)
         a = s.args[0]
-        
+     
         if a.op =='All': 
             return NaryExpr('Exists', *[a.args[0], NOT(a.args[1])])
         
@@ -209,7 +246,6 @@ def move_not_inwards(s):
         else:
             return s
     else:
-#        print 'Hello from unknown!'
         return Expr(s.op, *map(move_not_inwards, s.args))   
 
 
