@@ -547,206 +547,209 @@ TESTING Codes
 #===============================================================================
 #testing skolemize
 #e=expr('All(i,All(z,Exists(x ,R(i) & Exists(y,P(x,y,z)))) | Exists(y,Q(y) &E(i))) & Exists(x,Exists(y,M(x,y))) | Exists(x,All(y,M(x,y))&All(y,P(x,y)))')
-e=expr('All(x,R(x)&Exists(h,G(h,x)))|Exists(h,T(h,x))')
-
-print standardize_apart(e,{}) 
-print skolemize(e)
-
-le=expr('All(x,P(x)<=>(Q(x)|Exists(y,Q(y)&R(y,x))))')
-print to_clause_form(le,True)
-
-#print expr('Q(x) ==> P(x)')
-#y2= expr('x ==> y')
-#h= expr('z ==> l')
+#e=expr('All(x,R(x)&Exists(h,G(h,x)))|Exists(h,T(h,x))')
 #
+#print standardize_apart(e,{}) 
+#print skolemize(e)
+#
+#le=expr('All(x,P(x)<=>(Q(x)|Exists(y,Q(y)&R(y,x))))')
+#print to_clause_form(le,True)
+#
+##print expr('Q(x) ==> P(x)')
+##y2= expr('x ==> y')
+##h= expr('z ==> l')
+##
+##m=expr('P(x,g(x),g(f(a)))')
+##n=expr('P(f(u),v,v)')
+##
+##f= unify(m, n, {})
+##print m,n, f
+##
+#m=expr('P(a,y,f(y))')
+#n=expr('P(z,z,u)')
+##
+#f= unify(m, n, {})
+#print m,n,f
+#
+##
+##m = expr('P(x,g(x),x)')
+##n = expr('P(g(u),g(g(z)),z)')
+##print n.op, n.args
+##f= unify(m, n, {})
+##print m,n,f
+##
+###print f[z]
+#m = expr('P(x)')
+#n = expr('P(z)')
+##print m.args
+##
+#f= unify(m, n, {})
+#print m,n,f
+#
+#
+##x=expr('x')
+##s3={}
+##s3[x]=expr('c')
+##print subst(expr('P(x,f(g(x)),f(v))'), s3)
+##print expr('Q(x) ==> P(x)')
+##y2= expr('x ==> y')
+##h= expr('z ==> l')
+##
 #m=expr('P(x,g(x),g(f(a)))')
 #n=expr('P(f(u),v,v)')
 #
 #f= unify(m, n, {})
 #print m,n, f
+##
+##m=expr('P(a,y,f(y))')
+##n=expr('P(z,z,u)')
 #
-m=expr('P(a,y,f(y))')
-n=expr('P(z,z,u)')
+##f= unify(m, n, {})
+##print m,n,f
 #
-f= unify(m, n, {})
-print m,n,f
-
 #
 #m = expr('P(x,g(x),x)')
 #n = expr('P(g(u),g(g(z)),z)')
-#print n.op, n.args
+##
+#f= unify(m, n)
+#print m,n,f
+##
+###print f[z]
+#m = expr('P(x)')
+#n = expr('P(f(x))')
+##print m.args
+##
 #f= unify(m, n, {})
 #print m,n,f
 #
-##print f[z]
-m = expr('P(x)')
-n = expr('P(z)')
-#print m.args
-#
-f= unify(m, n, {})
-print m,n,f
-
-
-#x=expr('x')
-#s3={}
-#s3[x]=expr('c')
-#print subst(expr('P(x,f(g(x)),f(v))'), s3)
-#print expr('Q(x) ==> P(x)')
-#y2= expr('x ==> y')
-#h= expr('z ==> l')
-#
-m=expr('P(x,g(x),g(f(a)))')
-n=expr('P(f(u),v,v)')
-
-f= unify(m, n, {})
-print m,n, f
-#
-#m=expr('P(a,y,f(y))')
-#n=expr('P(z,z,u)')
-
-#f= unify(m, n, {})
-#print m,n,f
-
-
-m = expr('P(x,g(x),x)')
-n = expr('P(g(u),g(g(z)),z)')
-#
-f= unify(m, n)
-print m,n,f
-#
-##print f[z]
-m = expr('P(x)')
-n = expr('P(f(x))')
-#print m.args
-#
-f= unify(m, n, {})
-print m,n,f
-
-m=expr('Q(y,g(A,B))')
-n=expr('Q(g(x,x),y)')
-#
-f= unify(m, n, {})
-print m,n,f
-#
-#d= unify(y2, h, {})
-#print d
-#print d[y]
-#print x
-#
-
-#===============================================================================
-#===============================================================================
-#---------CNF Testing------------------------ 
-#===============================================================================
-#===============================================================================
-
-#m = expr('x <=> y')
-#
-#n = to_cnf(m)
-#
-#print 'CNF: ', n 
-
-#m = expr ('All(x, B(x) <=> Q(x))')
-#
-#print m
-#print to_clause_form(m, True)
-
-#===============================================================================
-# Taken from: Working right! 
-# http://www.csupomona.edu/~jrfisher/www/prolog_tutorial/logic_topics/normal_forms/normal_form.html
-#===============================================================================
-#n = expr ('All(x, P(x) | Q(x)) >> Exists(y, R(x, y))')
-#
-#print to_clause_form(n)
-
-#===============================================================================
-# Taken from: Working wrong! > Bug in move not inwards 
-# https://docs.google.com/viewer?url=http%3A%2F%2Fwww.cse.msstate.edu%2F~hansen%2Fclasses%2FAIspring04%2Fslides%2Fpredicatelogic.pdf
-#===============================================================================
-#l = expr ('All(x, (Pass(x, History) & Win (x, Lottery)) >> Happy(x))')
-
-# Take care: you should not write the previous expression as:
-#l = expr ('All(x, Pass(x, History) & Win (x, Lottery) >> Happy(x))')
-
-#print to_clause_form(l, True)
-
-#h  = expr (' ( P(x, A) & Q(x, B)) >> R(x)')
-#
-#n = to_cnf(h)
-#
-#print n 
-
-#print to_clause_form(h, True)
-#
-#h  = expr (' All(x, ( P(x, A) & Q(x, B))  >> R(x))')
-
-#print to_clause_form(h, True)
-# BUG > Fixed
-#print to_cnf(h)
-
-# Expressions from the Project description
-
-#m = expr ('Exists (x, (P(x) & All (x, Q(x) >> ~P(x) ) ) )')
-#
-#print to_cnf(m, True) #need to check the renaming?
-#
-#n = expr ('All (x, P(x) <=> (Q(x) & Exists (y, (Q(y) & R(y, x)))))')
-#
-#print to_clause_form(n, True)
-
-#print to_cnf(n, True)
-#
-#
-#g = expr ('~(All (x, All(y, P(x) | ~M(x, y) )))')
-
-#print '\nExpression to negate: ', g
-
-#print 'Expr of elimination: ', eliminate_for_All(g)
-
-#m = expr ('~(All (x, All(y, P(x) | M(x, y) )))')
-
-
-#notm = test2(m)
-#notm = move_not_inwards(m)
-
-
-#print 'Negation in For all: ', notm
-
-
-#m = expr ('~(Exists (x, Exists(y, P(x) | M(x, y) )))')
-#print '\nExpression to negate: ', m
-#notm = move_not_inwards(m)
-#
-#print 'Negation in There Exists: ', notm
-#
-#m = expr ('~(Exists (x, All(y, P(x) | M(x, y) )))')
-#print '\nExpression to negate: ', m
-#notm = move_not_inwards(m)
-#
-#print 'Negation in There Exists with For all: ', notm
-
-#m = expr ('Exists(x,(P(x)&Q(y))>>R(x))')
-
-#print 'Removing negation: ', test3_h(notm)
-
-#h = eliminate_for_All(m)
-
-#print to_clause_form(m,True)
-
-#print eliminate_for_All(m)
-
-
-#print expr('ForAll x');
-
 #m=expr('Q(y,g(A,B))')
 #n=expr('Q(g(x,x),y)')
-#
+##
 #f= unify(m, n, {})
 #print m,n,f
+##
+##d= unify(y2, h, {})
+##print d
+##print d[y]
+##print x
+##
 #
-#d= unify(y2, h, {})
-#print d
-#print d[y]
-#print x
+##===============================================================================
+##===============================================================================
+##---------CNF Testing------------------------ 
+##===============================================================================
+##===============================================================================
 #
 
+m = expr('Exists(x,P(x) & All(x,Q(x) >> ~P(x)))')
+to_clause_form(m, True)
+
+##m = expr('x <=> y')
+##
+##n = to_cnf(m)
+##
+##print 'CNF: ', n 
+#
+##m = expr ('All(x, B(x) <=> Q(x))')
+##
+##print m
+##print to_clause_form(m, True)
+#
+##===============================================================================
+## Taken from: Working right! 
+## http://www.csupomona.edu/~jrfisher/www/prolog_tutorial/logic_topics/normal_forms/normal_form.html
+##===============================================================================
+##n = expr ('All(x, P(x) | Q(x)) >> Exists(y, R(x, y))')
+##
+##print to_clause_form(n)
+#
+##===============================================================================
+## Taken from: Working wrong! > Bug in move not inwards 
+## https://docs.google.com/viewer?url=http%3A%2F%2Fwww.cse.msstate.edu%2F~hansen%2Fclasses%2FAIspring04%2Fslides%2Fpredicatelogic.pdf
+##===============================================================================
+##l = expr ('All(x, (Pass(x, History) & Win (x, Lottery)) >> Happy(x))')
+#
+## Take care: you should not write the previous expression as:
+##l = expr ('All(x, Pass(x, History) & Win (x, Lottery) >> Happy(x))')
+#
+##print to_clause_form(l, True)
+#
+##h  = expr (' ( P(x, A) & Q(x, B)) >> R(x)')
+##
+##n = to_cnf(h)
+##
+##print n 
+#
+##print to_clause_form(h, True)
+##
+##h  = expr (' All(x, ( P(x, A) & Q(x, B))  >> R(x))')
+#
+##print to_clause_form(h, True)
+## BUG > Fixed
+##print to_cnf(h)
+#
+## Expressions from the Project description
+#
+##m = expr ('Exists (x, (P(x) & All (x, Q(x) >> ~P(x) ) ) )')
+##
+##print to_cnf(m, True) #need to check the renaming?
+##
+##n = expr ('All (x, P(x) <=> (Q(x) & Exists (y, (Q(y) & R(y, x)))))')
+##
+##print to_clause_form(n, True)
+#
+##print to_cnf(n, True)
+##
+##
+##g = expr ('~(All (x, All(y, P(x) | ~M(x, y) )))')
+#
+##print '\nExpression to negate: ', g
+#
+##print 'Expr of elimination: ', eliminate_for_All(g)
+#
+##m = expr ('~(All (x, All(y, P(x) | M(x, y) )))')
+#
+#
+##notm = test2(m)
+##notm = move_not_inwards(m)
+#
+#
+##print 'Negation in For all: ', notm
+#
+#
+##m = expr ('~(Exists (x, Exists(y, P(x) | M(x, y) )))')
+##print '\nExpression to negate: ', m
+##notm = move_not_inwards(m)
+##
+##print 'Negation in There Exists: ', notm
+##
+##m = expr ('~(Exists (x, All(y, P(x) | M(x, y) )))')
+##print '\nExpression to negate: ', m
+##notm = move_not_inwards(m)
+##
+##print 'Negation in There Exists with For all: ', notm
+#
+##m = expr ('Exists(x,(P(x)&Q(y))>>R(x))')
+#
+##print 'Removing negation: ', test3_h(notm)
+#
+##h = eliminate_for_All(m)
+#
+##print to_clause_form(m,True)
+#
+##print eliminate_for_All(m)
+#
+#
+##print expr('ForAll x');
+#
+##m=expr('Q(y,g(A,B))')
+##n=expr('Q(g(x,x),y)')
+##
+##f= unify(m, n, {})
+##print m,n,f
+##
+##d= unify(y2, h, {})
+##print d
+##print d[y]
+##print x
+##
