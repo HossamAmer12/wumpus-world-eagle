@@ -337,7 +337,7 @@ _NaryExprTable = {'&':TRUE, '|':FALSE, '+':ZERO, '*':ONE}
 
 
 def addClause(s):
-    list = disjunction_clause(s)
+#    list = disjunction_clause(s)
     s=conjuncts_to_clauses(s)
     s=disjuncts_to_clauses(s)
     return s
