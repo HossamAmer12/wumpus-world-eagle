@@ -1,23 +1,38 @@
-\label{chap:assign1}{
+\label{chap:assign1}{}
 \section{Expression}
-The first order logic expressions are expressed in our implementation is the following.
-
+The first order logic expressions are expressed in our implementation Using Expr
+module. Expression can be either variable, constant, predicate or function. 
+This Expr object consists of 2 main parts: operator and list of arguments. This
+list of argument can contain either variable, constants, predicates or function
+expressed as Expressions or a complex expression. operators can be:
 \begin{enumerate}
 \item{And: to represent the and in first order logic we will let the user enter an \& literal to donate the and}
 \item{Or: to represent the Or in first order logic we will let the user enter $\mid$ to denote an Or.}
 \item{Not: to represent the Not in first order logic the user will enter $\sim$ to denote and $\sim$}
 \item{$\Rightarrow$(Implication): this is donated by $\gg$ or $\ll$. A$\gg$B means that the A $Rightarrow$B and the opposite is true.}
 \item{$\Leftrightarrow$ (Equivalence): the user can denote the Equivalence by $<$=$>$ symbol}
+\end{enumerate}
+
+For quantifier are expressed as special type of predicates 
+\begin{enumerate}
 \item{$\forall$: is represented by All(variable, Expression). Where the variable is the variable that the $\forall$ is applied to.}
 \item{$\exists$: is represented by Exists(variable, Expression). Where variable is the variable that the $\exists$ is applied to.}
 \end{enumerate}
 
+Also Expr has some functions that used to know the type of the expression used
+whether its variable or predicate\ldots . 
+\begin{enumerate}
+\item is\_variable to check whether this is an variable or not.
+\item is \_var\_symbol to check whether the operator this expression is
+avariable symbol or not
+\item is\_symbol to check whether the expression operator is predicate symbol or
+logical operator or not
+\item expr that takes string input to create Expr object
+\end{enumerate}
 
-\paragraph*{}
-Using the above expressions one can perform first order logic expressions. The user we do it as follows, expr(), and inside the bracket we can add any of the above expressions. 
-
+ Using the above expressions one can perform first order logic expressions. The
+ user we do it as follows, expr(), and inside the bracket we can add any of the above expressions.
 A sample expression could be:
-
 
 
 \textit{expr ('All(x, P(x) $\mid$ Q(x)) $>$$>$ Exists(y, R(x, y))')}
@@ -27,7 +42,10 @@ which is equivalent to:
 $\forall{x}$ ((P(x) $\mid$ Q(x)) $\Rightarrow$ $\exists{y}$(R(x, y)))
 
 \section{Unification}
-It is a process of trying to find a substitution for two first order logic expressions such that the expressions after applying the substitution are identical. It is used in a process of adding extra expressions to the AI's knowledge base.
+It is a process of trying to find a substitution for two first order logic
+expressions such that the expressions after applying the substitution are
+identical. It is used in a process of adding extra expressions to the AI's
+knowledge base using forward chaining and backward chaining.
 
 \subsection{Unification Implementation}\label{unificationMethod}
 The process that was followed to perform the unification process is very similar to the process that was discussed in class. There will be a check, if the substitution is set through out the process, to nothing then this will return that there is no substitution. On the other hand, we will check if both expressions are equal then we will return the substitution that was reached till this point. Otherwise, if the first expression that is an input to the unification process is a variable we will try to unify this variable with the other expression. Also the same check is performed for the other expression if the first expression was not a variable. If both expressions are not variables we will try to unify the first part of the expression and also we will call the unification of the rest of the expression. Moreover if any of the expressions is not an expression or empty we will return that there is no unification. Otherwise if they are both sequences and have the same length we try to unify them and recursively try the other elements.Lastly if none of the above cases then we will return that there is no unification that can be performed.
@@ -36,12 +54,6 @@ The process that was followed to perform the unification process is very similar
 Next we will describe more the process that is performed in our unification method.
 \subsubsection{unify(expression, expression, $\mu$)}
 This method is the root of the unification process. This method does the process that was described above in the unification method.
-\subsubsection{is\_variable(expression)}
-This method is used to check if the expression is a variable this process is done through the following. It will first check if the value does not have arguments and at the same time the operator is a variable symbol. If all of the above conditions are fulfilled then this is specified as a variable otherwise it is not a variable.
-
-\subsubsection{is\_var\_symbol(String)}
-This will perform a check to see if the element that is entering is a variable symbol or not. it is taken that any lower case letter is a variable symbol.
-
 \subsubsection{unify\_var(variable,expression,$\mu$)}
 This method will try to get a substitution that will allow the variable to be the same as the expression but first some conditions need to be satisfied. We need to check if the variable is already in $\mu$ then we will try to unify the rest of this substitution with the rest of the expression that we had at first. Otherwise, we will need to check to see if the variable is not generated after applying $\mu$ on the expression, then will be specified that we need to return that there is no unification that can occur because we will reach a loop. If it is none of the above cases then we will add this variable to $\mu$.
 \subsubsection{occur\_check(variable, expression)}
@@ -111,13 +123,30 @@ This method will call the disjunct method repeatedly with the different elements
 \subsubsection{clause\_form\_standardize\_apart}
 This method will start to rename the variables inside the clauses. It is performed through a check to see if the variable is already in the dictionary then it is removed other wise it is kept the same. The method will go through all clauses performing this action.
 \section{Running The Code}
-To run the code the user first of all will need to create a proper expressions as described in the expression part. If the user will want to unify then he will need 2 expressions and then the user will call the method unify and send to it both expressions. Otherwise if the user wants to convert a first order logic to clausal form then also an expression needs to be created and then this expression is sent to the method to\_clause\_form.
+To run the code you have to run FOL.py file.
+To test:
+\begin{enumerate}
+\item FOL file you will find testing part, set trace to True to use
+trace mode.
+\item Add new expressions by x= expr('P(x)'), y=expr('P(y)')
+\item To test the unify call unify unify(x,y) and clause form
+to\_clause\_form(x)
+\item To use $\forall\ x$ use All(x, exprission)  and $\exists$ use Exists(y,
+expression)
+\end{enumerate}
+
+Also, user can run the code through terminal by using :
+\begin{description}
+\item python FOL.py 'unify' 'expr1' 'expr2' (1 or 0 for trace) 
+\item python FOL.py 'toClause' 'expr1' 'expr2' (1 or 0 for trace)
+\end{description}
+ 
 
 \section{Run Results}
 \begin{center}
 Unification
 \end{center}
-\begin{table}[htb]
+\begin{table}[H]
 \begin{tabular}{| p{7cm}  | p{7cm} | }
  \hline
 Expression  & $\mu$
@@ -134,7 +163,7 @@ f(x,g(x),x), f(g(u),g(g(z)),z) & None
 \begin{center}
 Clause Form
 \end{center}
-\begin{table}[htb]
+\begin{table}[H]
 \begin{tabular}{| p{7cm}  | p{7cm} | }
  \hline
 Expression  & Clausal form
@@ -147,4 +176,13 @@ $\forall$ x[P(x) $\Leftrightarrow$ (Q(x) $\wedge$ $\exists$ y [Q(y) $\wedge$ R(y
 \\ \hline
 \end{tabular}
 \end{table}
-}
+
+\section{Refrences}
+\begin{enumerate}
+  \item Torsten Hahmann, lecture: ''Skolemization, Most General
+  Uniﬁers,First-Order Resolution'',
+  (http://www.cs.toronto.edu/~sheila/384/w11/Lectures/csc384w11-KR-tutorial.pdf)
+  \item AIMIA library by Berkeley
+  uni (http://aima.cs.berkeley.edu/python/logic.html)
+\end{enumerate}
+
