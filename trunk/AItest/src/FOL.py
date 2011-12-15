@@ -335,6 +335,33 @@ def distribute_and_over_or(s):
     >>> distribute_and_over_or((A & B) | C)
     ((A | C) & (B | C))
     """
+    
+    """
+    This methods checks on the operators of the given expression.
+    
+    If the operator is |:
+        It get an expression by distributing the | on the arguments of s.
+        Then it check if the args of s are zero then it return false, but if one it 
+        returns the result of the distribution on that argument.
+        Then it checks if any of the arguments of s has & as an operator. If not, then 
+        it returns just the | operator distributed on the given expression. Otherwise,
+        it makes another list of arguments that are not in the conjuncts list. 
+        Then, it checks if the length of this other list is 0, it returns the argument 
+        it has. However, if it has more arguments, it distributes the | on the othersList.
+        Afterwards, it return a nary expression of distributing the & on the list
+        of applying this method on the | between the conjuncts and the rest without
+        conjuncts and has all |.
+        
+     If the operator is &:
+         Simply, it returns the nary expression of distributing the & on the list
+         produced from applying our method on the rest of the args of the given expression
+         s
+      If the operator is neither & nor |:
+          Therefore, we hit a base case and we return the given expression in a
+          sum of products fashion.
+    """
+    
+    
     if s.op == '|':
         s = NaryExpr('|', *s.args)
         if len(s.args) == 0:
