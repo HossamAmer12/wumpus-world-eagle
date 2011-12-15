@@ -1,20 +1,33 @@
 \label{chap:assign1}{
 \section{Expression}
 The first order logic expressions are expressed in our implementation is the following.
+
 \begin{enumerate}
 \item{And: to represent the and in first order logic we will let the user enter an \& literal to donate the and}
 \item{Or: to represent the Or in first order logic we will let the user enter $\mid$ to denote an Or.}
 \item{Not: to represent the Not in first order logic the user will enter $\sim$ to denote and $\sim$}
 \item{$\Rightarrow$(Implication): this is donated by $\gg$ or $\ll$. A$\gg$B means that the A $Rightarrow$B and the opposite is true.}
 \item{$\Leftrightarrow$ (Equivalence): the user can denote the Equivalence by $<$=$>$ symbol}
-\item{$\forall$: is represented by All(variable,Expression). Where the variable is the variable that the $\forall$ is applied to.}
-\item{$\exists$: is represented by Exist(variable,Expression). Where variable is the variable that the $\exists$ is applied to.}
+\item{$\forall$: is represented by All(variable, Expression). Where the variable is the variable that the $\forall$ is applied to.}
+\item{$\exists$: is represented by Exists(variable, Expression). Where variable is the variable that the $\exists$ is applied to.}
 \end{enumerate}
+
+
 \paragraph*{}
-Using the above expressions one can perform first order logic expressions. The user we do it as follows, expr(), and inside the bracket we can add any of the above expressions.
+Using the above expressions one can perform first order logic expressions. The user we do it as follows, expr(), and inside the bracket we can add any of the above expressions. 
+
+A sample expression could be:
+
+\textit{expr ('All(x, P(x) $\mid$ Q(x)) $>$$>$ Exists(y, R(x, y))')}
+
+which is equivalent to:
+
+$\forall{x}$ ((P(x) $\mid$ Q(x)) $\Rightarrow$ $\exists{y}$(R(x, y)))
+
 \section{Unification}
 This is a process of specifying that two first order logic expressions are
 equal. To specify that the first order logic expressions are equal we need to find a substitution to all the variables so one can reach at the end that the 2 expressions are exactly the same.
+
 \subsection{Unification Implementation}\label{unificationMethod}
 The process that was followed to perform the unification process is very similar to the process that was discussed in class. There will be a check, if the substitution is set through out the process, to nothing then this will return that there is no substitution. On the other hand, we will check if both expressions are equal then we will return the substitution that was reached till this point. Otherwise, if the first expression that is an input to the unification process is a variable we will try to unify this variable with the other expression. Also the same check is performed for the other expression if the first expression was no a variable. If both expressions are not variables we will try to unify the first part of the expression and also we will call the unification of the rest of the variable. Moreover if any of the expressions is not an expression or any is empty we will return that there is no unification. Otherwise if they are both sequences and have the same length we try to unify them and recursively try the other elements.Lastly if none of the above cases then we will return that there is no unification that can be performed.
 \subsection{Unification Methods}
@@ -35,9 +48,12 @@ This method will add the the substitution that is performed on the variable. and
 \subsubsection{subst(expression,dictionary)}
 This method will start by replacing all occurrences of the dictionary in the expression.
 \section{Clausal Form}
-Clause form is another way to illustrate conjunctive normal form. Conjunctive normal form is achieved by applying a certain number or rules to convert any first order logic expression into conjunctive normal form. After obtaining the conjunctive normal. Then the conjunctive normal form is easily converted to clausal from. The reason why it is used is to allow for proving the expression by resolution.
+Clause form is another way to illustrate conjunctive normal form. Conjunctive normal form is achieved by applying a certain number or rules to convert any first order logic expression into conjunctive normal form. After obtaining the CNF, it is easily converted into clausal from. The Clausal Form is used for applying resolution and getting some proofs.
+
+
 \section{Clausal Form Implementation}
-To be able to perform the clausal form first we will need to perform Conjunctive normal form(CNF). the process t perform the clausal normal form consists of 8 steps that need to be performed in a certain order these are the following as discussed in class.
+To be able to perform the clausal form first we will need to convert into Conjunctive normal form(CNF). To convert into the clausal normal form consists of 8 steps that need to be performed in a sequential order listed below:
+
 \begin{enumerate}
 \item{Remove equivalence: this is done by adding to imply expressions instead of the equivalence.}
 \item{Remove implication: the implication will also be removed by using the implication elimination rule. It specifies that any implication can be changed to and $\vee$ and a $\neg$ to the element that follows the implications.}
