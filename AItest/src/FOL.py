@@ -190,7 +190,7 @@ def move_not_inwards(s):
     If I had a not operator, I make a function NOT to move the not into all the 
     expression (called b). 
     We take the first argument of the expression.
-    We check on its operator.
+    We check on its operator as follows:
     
     if operator = 'All'
         then we return a Nary expression by distributing the Exists on the first argument 
@@ -305,8 +305,22 @@ skolemize.__functionsCount=0
 
 def eliminate_for_All (s):
     """
-    step 6: Eliminates For All operator for a given expression s 
+    step 6: Eliminates All operator for a given expression s 
     """
+    """
+        First we check if the operator is a symbol or the s.args = false, and finally
+        the operator is not the All reserved operator, then we return s.
+        
+        Then we map our method on all the arguments of s and store it in the args variable.
+        If we find that the operator is All we return b which is the args[n-1], where n 
+        is the size of the list. Hence, leaving all except the All operator.
+        Else
+            We return an expression with the current operator and the args produced
+            from mapping our function on the current arguments of the given expression.
+        
+    """
+    
+    
     if (not s.args or is_symbol(s.op)) and not s.op == 'All': 
         return s     ## (Atoms are unchanged.)
     
