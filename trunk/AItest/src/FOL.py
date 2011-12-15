@@ -173,7 +173,7 @@ def eliminate_equivalence(s):
     if not s.args or (is_symbol(s.op) and s.op != 'All' and s.op != 'Exists') : return s     ## (Atoms are unchanged.)
     args = map(eliminate_equivalence, s.args)
     a, b = args[0], args[-1]
-    # if equal seperate it
+    # if equal separate it
     if s.op == '<=>':
         return (a >> b) & (b >> a)
     else:
@@ -189,6 +189,7 @@ def eliminate_implications(s):
     >>> eliminate_implications(A >> (~B << C))
     ((~B | ~C) | ~A)
     """
+    
     if not s.args or (is_symbol(s.op) and s.op != 'All' and s.op != 'Exists') : return s     ## (Atoms are unchanged.)
     args = map(eliminate_implications, s.args)
     a, b = args[0], args[-1]
@@ -454,12 +455,16 @@ def disjuncts_to_clauses(s):
     >>> disjuncts(A & B)
     [(A & B)]
     """
-    if isinstance(s, Expr) and s.op == '|':
+    # if and go to next depth
+    if isinstance(s, Expr) and s.op == '&':
+        return Expr(s.op,*map(disjuncts_to_clauses,s.args))
+    # if or return the or arguments
+    elif isinstance(s, Expr) and s.op == '|':
         return str(s.args)
     else:
-        return Expr(s.op,*map(disjuncts_to_clauses,s.args))
-
-
+        #if on element put it in list and return
+        return str([s])
+    
 def conjuncts_to_clauses(s):
     """
     step 10: listify conjunctions
@@ -508,6 +513,7 @@ def rename(exp,local_dic,global_dic):
                 local_dic[exp]=exp
         return local_dic[exp] 
     elif is_symbol(exp.op):
+        print 
         # if it's not avar nut sympol predicate or function apply rename on functions
         return Expr(exp.op,*[rename(a, local_dic,global_dic) for a in exp.args])
     else :
