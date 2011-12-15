@@ -1,37 +1,42 @@
 \label{chap:assign1}{
-
-
-\section{Unification}\label{unificationMethod}
-
-	The process that was followed to perform the unification process is very similar to the process that was discussed in class. There will be a check, if the substitution is set through out the process, to nothing then this will return that there is no substitution. On the other hand, we will check if both expressions are equal then we will return the substitution that was reached till this point. Otherwise, if the first expression that is an input to the unification process is a variable we will try to unify this variable with the other expression. Also the same check is performed for the other expression if the first expression was no a variable. If both expressions are not variables we will try to unify the first part of the expression and also we will call the unification of the rest of the variable. Moreover if any of the expressions is not an expression or any is empty i will return that there is no unification. Otherwise if they are both sequences and have the same length i try to unify them and recursively try the other elements.Lastly if none of the above cases then i will return that there is no unification that can be performed.
-	
-
+\section{Expression}
+The first order logic expressions are expressed in our implementation is the following.
+\begin{enumerate}
+\item{And: to represent the and in first order logic we will let the user enter an \& literal to donate the and}
+\item{Or: to represent the Or in first order logic we will let the user enter $\mid$ to denote an Or.}
+\item{Not: to represent the Not in first order logic the user will enter $\sim$ to denote and $\sim$}
+\item{$\Rightarrow$(Implication): this is donated by $\gg$ or $\ll$. A$\gg$B means that the A $Rightarrow$B and the opposite is true.}
+\item{$\Leftrightarrow$ (Equivalence): the user can denote the Equivalence by $<$=$>$ symbol}
+\item{$\forall$: is represented by All(variable,Expression). Where the variable is the variable that the $\forall$ is applied to.}
+\item{$\exists$: is represented by Exist(variable,Expression). Where variable is the variable that the $\exists$ is applied to.}
+\end{enumerate}
+\paragraph*{}
+Using the above expressions one can perform first order logic expressions. The user we do it as follows, expr(), and inside the bracket we can add any of the above expressions.
+\section{Unification}
+This is a process of specifying that two first order logic expressions are
+equal. To specify that the first order logic expressions are equal we need to find a substitution to all the variables so one can reach at the end that the 2 expressions are exactly the same.
+\subsection{Unification Implementation}\label{unificationMethod}
+The process that was followed to perform the unification process is very similar to the process that was discussed in class. There will be a check, if the substitution is set through out the process, to nothing then this will return that there is no substitution. On the other hand, we will check if both expressions are equal then we will return the substitution that was reached till this point. Otherwise, if the first expression that is an input to the unification process is a variable we will try to unify this variable with the other expression. Also the same check is performed for the other expression if the first expression was no a variable. If both expressions are not variables we will try to unify the first part of the expression and also we will call the unification of the rest of the variable. Moreover if any of the expressions is not an expression or any is empty we will return that there is no unification. Otherwise if they are both sequences and have the same length we try to unify them and recursively try the other elements.Lastly if none of the above cases then we will return that there is no unification that can be performed.
 \subsection{Unification Methods}
 \paragraph*{}
 Next we will describe more the process that is performed in our unification method.
-
 \subsubsection{unify(expression, expression, $\mu$)}
 This method is the root of the unification process. This method does the process that was described above in the unification method.
-
 \subsubsection{is\_variable(expression)}
 This method is used to check if the expression is a variable this process is done through the following. It will first check if the value does not have arguments and at the same time the operator is a variable symbol. If all of the above conditions are fulfilled then this is specified as a variable otherwise it is not a variable.
-
 \subsubsection{is\_var\_symbol(String)}
 This will perform a check to see if the element that is entering is a variable symbol or not. it is taken that any lower case letter is a variable symbol.
-
 \subsubsection{unify\_var(variable,expression,$\mu$)}
 This method will try to get a substitution that will for the variable to be the same as the expression but first some conditions need to be satisfied. I need to check if the variable is already in $\mu$ then we will try to unify the rest this substitution with the rest of the expression that we had at first. Otherwise, we will need to check to see if the variable already occurred in $\mu$ then this will specify that I need to return that there is no unification can occur because we will reach a loop. If it is none of the above cases then we will add this variable to $\mu$.
-
 \subsubsection{occur\_check(variable, expression)}
 This method will check to see if this variable already exists in the expression. The first check will be to see if the variable is equal to the expression which will mean that the expression is a variable. If it is the case then this means that the variables are the same implying that the variable occurs. If not the case then a check will be performed to see if the operands of the variable are the same as those of the expression or the rest of the expression parts. If not the case and the expression is a sequence then the check is performed for every element in the sequence.
-
 \subsubsection{extend($\mu$, variable, value) }
 This method will add the the substitution that is performed on the variable. and then this element is added to $\mu$. Also a check is performed to make sure that any changes needed to be performed the the $\mu$ is performed and that the elements are consistent.
-
 \subsubsection{subst(expression,dictionary)}
 This method will start by replacing all occurrences of the dictionary in the expression.
-
 \section{Clausal Form}
+Clause form is another way to illustrate conjunctive normal form. Conjunctive normal form is achieved by applying a certain number or rules to convert any first order logic expression into conjunctive normal form. After obtaining the conjunctive normal. Then the conjunctive normal form is easily converted to clausal from. The reason why it is used is to allow for proving the expression by resolution.
+\section{Clausal Form Implementation}
 To be able to perform the clausal form first we will need to perform Conjunctive normal form(CNF). the process t perform the clausal normal form consists of 8 steps that need to be performed in a certain order these are the following as discussed in class.
 \begin{enumerate}
 \item{Remove equivalence: this is done by adding to imply expressions instead of the equivalence.}
@@ -43,59 +48,45 @@ To be able to perform the clausal form first we will need to perform Conjunctive
 \item{Distribute the $\wedge$ over the $\vee$.}
 \item{Flatten: Remove non-needed brackets.}
 \end{enumerate}
-
 These are the steps that will be followed to make the expression into CNF. Last but not least we will make Clausal Form a list of lists.
-
 \subsubsection{to\_clause\_form(expression, trace)}
 This method will be used to convert the expression to Clause form (CF). The given trace will specify if the user wants to see the process of creating the CF. Then the user will change to clausal form where it is a list of lists. The big lists signify the expressions between $\vee$ operators. However, the small ones signify expressions grouped with the $\wedge$ operator.
-
 \subsubsection{to\_cnf(expression,trace)}
 This method will create the CNF and this method will call the steps from different methods.
-
 \subsubsection{eliminate\_equivalence(expression)}
-This method will perform the equivalence removal. First of all,  it checks whether the current expression is a symbol. If it is a symbol and the operator is not $\forall$ neither $\exists$ then it finally returns the expression.  If it is not a atom we will keep going through the expression until and check if it is and equivalence it will be removed and replaced with two implications of each part.
-
+This method will perform the equivalence removal. First of all, it checks whether the current expression is a symbol. If it is a symbol and the operator is not $\forall$ neither $\exists$ then it finally returns the expression. If it is not a atom we will keep going through the expression until and check if it is and equivalence it will be removed and replaced with two implications of each part.
 \subsubsection{eliminate\_implications(expression)}
 This method will perform the removal of the implication. We will check if it is an atom (or a symbol) we will perform no change. Otherwise, we will check if it is an implication and change every implication will be changed to an $\vee$ and the negation of the implied expression.
-
 \subsubsection{move\_not\_inwards(expression)}
 This method will perform a push to the not inwards as much as possible. There is a check on every part of the expression if it is a $\forall$ then it will be changed to a $\exists$. On the other hand, if it is an $\exists$ then it will be changed to $\forall$ followed by a not and vice versa. If it is a not then we will change it to a positive literal. The $\wedge$ is changed to an $\vee$ and vice versa.
-
 \subsubsection{standardize\_apart(expression,dictionary)}
- This method will perform renaming of variables. It will start to check for all the $\forall$ and the $\exists$ and start renaming variables that are the same to different names to make sure that no two variables have the same name.
- 
- \subsubsection{skolemize(expression,qun=[],dict={})}
- 
-TODOOOOOOOOOOXXXXXXXXXXXXXX 
- 
- \subsubsection{eliminate\_for\_All (s)}
- This method will simply remove the $\forall$. A check is done to see if it is a $\forall$ it is dropped and the rest of the expression is returned. It maps the method on all elements inside the expression to remove all existent $\forall$ operators.
- 
- \subsubsection{distribute\_and\_over\_or(expression)}
- This method will perform steps 7 and 8 at the same step. The $\vee$ is distributed if there is an expression were it can be pushed in. Also extra brackets are removed.
- 
- \subsubsection{NaryExpr(operator, expressions)}
+This method will perform renaming of variables. It will start to check for all the $\forall$ and the $\exists$ and start renaming variables that are the same to different names to make sure that no two variables have the same name.
+\subsubsection{skolemize(expression,qun=[],dict={})}
+This method should remove the existenitial quantifiers and substitute its
+variable with the proper new variable or function from the outer for all
+quantifier. This is a recursive function. It starts from the most outer
+operation and as stated before Forall and there exist are represented as
+predicates with two parts first is the variable and second is the evaluated
+expression. So, while executing whenever a forall is met its variable is
+stored to be used as function argument subsitituting following there exist
+variable. When a Exists is met its variable is stored in dictionary with its value the value is either a new function fn with
+which its arguments are the collected list of variables of upper foralls. If the
+list of variables is empty that means the existential quantifier is outer
+quantifier so a new variable is added to as value to the exist variable. Exists
+is removed and its expression is returned after substituting each variable from the dictionary.
+\subsubsection{eliminate\_for\_All (s)}
+This method will simply remove the $\forall$. A check is done to see if it is a $\forall$ it is dropped and the rest of the expression is returned. It maps the method on all elements inside the expression to remove all existent $\forall$ operators.
+\subsubsection{distribute\_and\_over\_or(expression)}
+This method will perform steps 7 and 8 at the same step. The $\vee$ is distributed if there is an expression were it can be pushed in. Also extra brackets are removed.
+\subsubsection{NaryExpr(operator, expressions)}
 This method or this kind of expression is really important to distribute the any kind of operator over the expression. It is used in our project to distribute the $\wedge$, $\vee$, and $\neg$ operators onto the expression. It promotes nested instances of the same op up to the top level.
- 
- \subsubsection{disjuncts(expression)}
- This will change expressions between disjunctions into elements in the same list. If it is an $\wedge$ it will be placed in a large list. This method will be used for clausal form.
- 
- \subsubsection{addClause(expression)}
-This method will add everything to a list and return it.
-
+\subsubsection{disjuncts(expression)}
+This will change expressions between disjunctions into elements in the same list. If it is an $\wedge$ it will be placed in a large list. This method will be used for clausal form.
+\subsubsection{disjuncts\_to\_clauses(expression)}
+This method will convert all $|$ expressions to a list and place the disjunctions in a list.
+\subsubsection{conjuncts\_to\_clauses(expression)}
+This method will convert all \& expressions to list.
 \subsubsection{disjunction\_clause(expression)}
 This method will call the disjunct method repeatedly with the different elements of the expression to change them into lists as needed by the clausal form.
-
-\section{References}
-
-The sources listed below helped us to implement our project:
-
-\begin{enumerate}
-
-\item Lectures and university materials.
-
-\item http://aima.cs.berkeley.edu/python/logic.html
-
-\end{enumerate}
-
-
+\section{Running The Code}
+To run the code the user first of all will need to create a proper expressions as described in the expression part. If the user will want to unify then he will need 2 expressions and then the user will call the method unify and send to it both expressions. Otherwise if the user wants to convert a first order logic to clausal form then also an expression needs to be created and then this expression is sent to the method to\_clause\_form.
