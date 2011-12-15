@@ -477,7 +477,7 @@ def conjuncts_to_clauses(s):
     if isinstance(s, Expr) and s.op == '&':
         return s.args
     else:
-        return Expr(s.op,*map(conjuncts_to_clauses,s.args))
+        return [s]
 
 def clause_form_standardize_apart(cf):   
     """
@@ -585,7 +585,8 @@ TESTING Codes
 ##print m,n,f
 ##
 ###print f[z]
-#m = expr('P(x)')
+m = expr('P(x)')
+print conjuncts_to_clauses(m)
 #n = expr('P(z)')
 ##print m.args
 ##
