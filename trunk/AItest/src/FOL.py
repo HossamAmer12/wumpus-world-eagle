@@ -273,7 +273,7 @@ def standardize_apart(s,dic={}):
     if is_symbol(s.op) and (s.op == 'All' or s.op == 'Exists'):        
         if s.args[0] in dic:
             standardize_apart.counter += 1
-            dic[s.args[0]] = Expr('v%d' % standardize_apart.counter)
+            dic[s.args[0]] = Expr('x%d' % standardize_apart.counter)
         else:
             dic[s.args[0]]= s.args[0]
         return Expr(s.op, *[standardize_apart(a, dic) for a in s.args]) 
@@ -585,7 +585,7 @@ TESTING Codes
 ##print m,n,f
 ##
 ###print f[z]
-m = expr('P(x)')
+m = expr('P(x)&Q(x)')
 print conjuncts_to_clauses(m)
 #n = expr('P(z)')
 ##print m.args
