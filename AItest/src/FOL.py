@@ -64,15 +64,6 @@ def extend(s, var, val):
     {y: 2, x: 1}
     """
     s2 = s.copy()
-    # substitute the variables in val with the values from s2
-    #t= subst(val,s2)
-    # check if any substitution leads to a loop 
-#    for sub in s2:
-#        if occur_check(var, s2[sub]):
-#            if occur_check(sub, val):
-#                return None
-    #insert t in s2
-    #s2[var] = t
     s2[var] = val
     # fixing values of dict according to added sub
     s2=dict(map(lambda ex: (ex,subst(s2[ex],s2)),s2))
