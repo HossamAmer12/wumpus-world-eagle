@@ -18,6 +18,8 @@ Using the above expressions one can perform first order logic expressions. The u
 
 A sample expression could be:
 
+
+
 \textit{expr ('All(x, P(x) $\mid$ Q(x)) $>$$>$ Exists(y, R(x, y))')}
 
 which is equivalent to:
@@ -25,11 +27,10 @@ which is equivalent to:
 $\forall{x}$ ((P(x) $\mid$ Q(x)) $\Rightarrow$ $\exists{y}$(R(x, y)))
 
 \section{Unification}
-This is a process of specifying that two first order logic expressions are
-equal. To specify that the first order logic expressions are equal we need to find a substitution to all the variables so one can reach at the end that the 2 expressions are exactly the same.
+It is a process of trying to find a substitution for two first order logic expressions such that the expressions after applying the substitution are identical. It is used in a process of adding extra expressions to the AI's knowledge base.
 
 \subsection{Unification Implementation}\label{unificationMethod}
-The process that was followed to perform the unification process is very similar to the process that was discussed in class. There will be a check, if the substitution is set through out the process, to nothing then this will return that there is no substitution. On the other hand, we will check if both expressions are equal then we will return the substitution that was reached till this point. Otherwise, if the first expression that is an input to the unification process is a variable we will try to unify this variable with the other expression. Also the same check is performed for the other expression if the first expression was no a variable. If both expressions are not variables we will try to unify the first part of the expression and also we will call the unification of the rest of the variable. Moreover if any of the expressions is not an expression or any is empty we will return that there is no unification. Otherwise if they are both sequences and have the same length we try to unify them and recursively try the other elements.Lastly if none of the above cases then we will return that there is no unification that can be performed.
+The process that was followed to perform the unification process is very similar to the process that was discussed in class. There will be a check, if the substitution is set through out the process, to nothing then this will return that there is no substitution. On the other hand, we will check if both expressions are equal then we will return the substitution that was reached till this point. Otherwise, if the first expression that is an input to the unification process is a variable we will try to unify this variable with the other expression. Also the same check is performed for the other expression if the first expression was not a variable. If both expressions are not variables we will try to unify the first part of the expression and also we will call the unification of the rest of the expression. Moreover if any of the expressions is not an expression or empty we will return that there is no unification. Otherwise if they are both sequences and have the same length we try to unify them and recursively try the other elements.Lastly if none of the above cases then we will return that there is no unification that can be performed.
 \subsection{Unification Methods}
 \paragraph*{}
 Next we will describe more the process that is performed in our unification method.
@@ -37,18 +38,21 @@ Next we will describe more the process that is performed in our unification meth
 This method is the root of the unification process. This method does the process that was described above in the unification method.
 \subsubsection{is\_variable(expression)}
 This method is used to check if the expression is a variable this process is done through the following. It will first check if the value does not have arguments and at the same time the operator is a variable symbol. If all of the above conditions are fulfilled then this is specified as a variable otherwise it is not a variable.
+
 \subsubsection{is\_var\_symbol(String)}
 This will perform a check to see if the element that is entering is a variable symbol or not. it is taken that any lower case letter is a variable symbol.
+
 \subsubsection{unify\_var(variable,expression,$\mu$)}
-This method will try to get a substitution that will for the variable to be the same as the expression but first some conditions need to be satisfied. I need to check if the variable is already in $\mu$ then we will try to unify the rest this substitution with the rest of the expression that we had at first. Otherwise, we will need to check to see if the variable already occurred in $\mu$ then this will specify that I need to return that there is no unification can occur because we will reach a loop. If it is none of the above cases then we will add this variable to $\mu$.
+This method will try to get a substitution that will allow the variable to be the same as the expression but first some conditions need to be satisfied. We need to check if the variable is already in $\mu$ then we will try to unify the rest of this substitution with the rest of the expression that we had at first. Otherwise, we will need to check to see if the variable is not generated after applying $\mu$ on the expression, then will be specified that we need to return that there is no unification that can occur because we will reach a loop. If it is none of the above cases then we will add this variable to $\mu$.
 \subsubsection{occur\_check(variable, expression)}
-This method will check to see if this variable already exists in the expression. The first check will be to see if the variable is equal to the expression which will mean that the expression is a variable. If it is the case then this means that the variables are the same implying that the variable occurs. If not the case then a check will be performed to see if the operands of the variable are the same as those of the expression or the rest of the expression parts. If not the case and the expression is a sequence then the check is performed for every element in the sequence.
+This method will check to see if this variable already exists in the expression. The first check will be to see if the variable is equal to the expression which will mean that the expression is a variable. If it is the case then this means that the variables are the same implying that the variable occurs. If not the case then a check will be performed to see if the operands of the variable are the same as those of the expression or the rest of the expression parts. If not the case and the expression is a sequence then the check is performed for every element in the sequence. This method is used to check that the variable is not part of any of it's substitution.
 \subsubsection{extend($\mu$, variable, value) }
-This method will add the the substitution that is performed on the variable. and then this element is added to $\mu$. Also a check is performed to make sure that any changes needed to be performed the the $\mu$ is performed and that the elements are consistent.
+This method will add the the substitution that is performed on the variable and then this element is added to $\mu$. Also fix all old substitution
 \subsubsection{subst(expression,dictionary)}
 This method will start by replacing all occurrences of the dictionary in the expression.
+
 \section{Clausal Form}
-Clause form is another way to illustrate conjunctive normal form. Conjunctive normal form is achieved by applying a certain number or rules to convert any first order logic expression into conjunctive normal form. After obtaining the CNF, it is easily converted into clausal from. The Clausal Form is used for applying resolution and getting some proofs.
+Clause form is another way to illustrate conjunctive normal form. Conjunctive normal form is achieved by applying a certain number or rules to convert any first order logic expression into conjunction of disjunction of expressions. After obtaining the CNF, it is easily converted into clausal from. The Clausal Form is used for applying resolution and proofing first order logic.
 
 
 \section{Clausal Form Implementation}
@@ -96,13 +100,49 @@ This method will simply remove the $\forall$. A check is done to see if it is a 
 This method will perform steps 7 and 8 at the same step. The $\vee$ is distributed if there is an expression were it can be pushed in. Also extra brackets are removed.
 \subsubsection{NaryExpr(operator, expressions)}
 This method or this kind of expression is really important to distribute the any kind of operator over the expression. It is used in our project to distribute the $\wedge$, $\vee$, and $\neg$ operators onto the expression. It promotes nested instances of the same op up to the top level.
-\subsubsection{disjuncts(expression)}
-This will change expressions between disjunctions into elements in the same list. If it is an $\wedge$ it will be placed in a large list. This method will be used for clausal form.
+
 \subsubsection{disjuncts\_to\_clauses(expression)}
 This method will convert all $|$ expressions to a list and place the disjunctions in a list.
 \subsubsection{conjuncts\_to\_clauses(expression)}
 This method will convert all \& expressions to list.
 \subsubsection{disjunction\_clause(expression)}
 This method will call the disjunct method repeatedly with the different elements of the expression to change them into lists as needed by the clausal form.
+\subsubsection{clause\_form\_standardize\_apart}
+This method will start to rename the variables inside the clauses. It is performed through a check to see if the variable is already in the dictionary then it is removed other wise it is kept the same. The method will go through all clauses performing this action.
 \section{Running The Code}
 To run the code the user first of all will need to create a proper expressions as described in the expression part. If the user will want to unify then he will need 2 expressions and then the user will call the method unify and send to it both expressions. Otherwise if the user wants to convert a first order logic to clausal form then also an expression needs to be created and then this expression is sent to the method to\_clause\_form.
+
+\section{Run Results}
+\begin{center}
+Unification
+\end{center}
+\begin{table}[htb]
+\begin{tabular}{| p{7cm}  | p{7cm} | }
+ \hline
+Expression  & $\mu$
+\\ \hline
+P(x,g(x),g(f(a))), P (f (u), v, v) & x: f(a), v: g(f(a)), u: a
+\\ \hline
+P(a,y,f(y)), P(z,z,u) & a: z, y: z, u: f(z)
+\\ \hline
+f(x,g(x),x), f(g(u),g(g(z)),z) & None
+\\ \hline
+\end{tabular}
+\end{table}
+
+\begin{center}
+Clause Form
+\end{center}
+\begin{table}[htb]
+\begin{tabular}{| p{7cm}  | p{7cm} | }
+ \hline
+Expression  & Clausal form
+\\ \hline
+$\exists$x[P(x) ^ $\forall$x[Q(x)$\Rightarrow$ $\neq$P(x)]]
+\\ \hline
+P(a,y,f(y)), P(z,z,u) & a: z, y: z, u: f(z)
+\\ \hline
+f(x,g(x),x), f(g(u),g(g(z)),z) & None
+\\ \hline
+\end{tabular}
+\end{table}
