@@ -369,6 +369,24 @@ def NaryExpr(op, *args):
     nested instances of the same op up to the top level.
     >>> NaryExpr('&', (A&B),(B|C),(B&C))
     (A & B & (B | C) & B & C)
+    
+    We loop on the given arguments, then we check if the operator passed is equal
+    to the current operator, but the argument operator is neither Exists or All, 
+    we add to the argList the arguments of the current argument. We check that it
+    is neither All nor Exist since we don't want to lose the quantifier variables.
+    
+    Otherwise, we append the argument onto the argList.
+    
+    Then after finishing the loop, we check if the argument is just one, then we return it.
+    If the length of arguments if zero, we return one of our reserved logic values 
+    either True of False in our project (+ & * are not used).
+    
+    If neither of both cases, we return an expression with the operator and list of arguments
+    collected from the loop and this class 
+    returns an expression with N-ary (0 or more args) expression. 
+    
+    It is explained there how it is done that. 
+    
     """
     arglist = []
     for arg in args:
