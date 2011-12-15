@@ -259,7 +259,7 @@ def skolemize(s,qun=[],dict={}):
         dict2=dict.copy()
         dict2[s.args[0]]=Expr(f.op,*qun)
         return skolemize(s.args[1], qun,dict2)
-    if is_variable(s):# if variable subsititute 
+    if is_variable(s):# if variable substitute 
         if s in dict:
             return dict[s]
         else: 
