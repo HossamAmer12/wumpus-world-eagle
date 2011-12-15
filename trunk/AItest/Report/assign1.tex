@@ -103,8 +103,9 @@ This method or this kind of expression is really important to distribute the any
 
 \subsubsection{disjuncts\_to\_clauses(expression)}
 This method will convert all $|$ expressions to a list and place the disjunctions in a list.
-\subsubsection{conjuncts\_to\_clauses(expression)}
-This method will convert all \& expressions to list.
+
+\subsubsection{cnf\_to\_clauses(expression)}
+This method will check for $\wedge$ and apply disjuncts\_to\_clauses on every conjunction.
 \subsubsection{disjunction\_clause(expression)}
 This method will call the disjunct method repeatedly with the different elements of the expression to change them into lists as needed by the clausal form.
 \subsubsection{clause\_form\_standardize\_apart}
@@ -138,11 +139,12 @@ Clause Form
  \hline
 Expression  & Clausal form
 \\ \hline
-$\exists$x[P(x) ^ $\forall$x[Q(x)$\Rightarrow$ $\neq$P(x)]]
+
+$\exists$ x[P(x) $\wedge$ $\forall$ x[Q(x) $\Rightarrow$ $\neg$P(x)]] & [[P(z1)], [~P(s1), ~Q(s1)]] 
 \\ \hline
-P(a,y,f(y)), P(z,z,u) & a: z, y: z, u: f(z)
-\\ \hline
-f(x,g(x),x), f(g(u),g(g(z)),z) & None
+$\forall$ x[P(x) $\Leftrightarrow$ (Q(x) $\wedge$ $\exists$ y [Q(y) $\wedge$ R(y,x)])] & [[Q(s2), ~P(s2)], [Q(f1(x1)), ~P(x1)], [R(f1(x2), x2), ~P(x2)], [P(x3), ~Q(x3), ~Q(s3), ~R(s3, x3)]]
+
 \\ \hline
 \end{tabular}
 \end{table}
+}

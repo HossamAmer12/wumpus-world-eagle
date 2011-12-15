@@ -546,8 +546,8 @@ to set the trace mode
 """
 trace=False 
 
-m=expr('P(x,g(x),g(f(a)))&E(x)')
-print to_clause_form(m,True)
+#m=expr('P(x,g(x),g(f(a)))&E(x)')
+#print to_clause_form(m,True)
 
 
 
@@ -637,11 +637,13 @@ print '\n',m,n,f
 ##===============================================================================
 ##===============================================================================
 
-le=expr('All(x,P(x)<=>(Q(x)|Exists(y,Q(y)&R(y,x))))')
-print to_clause_form(le,True)
+le=expr('Exists(x,P(x) & All(x,Q(x)>>~P(x)))')
+print to_clause_form(le,trace)
 
 
-m = expr('Exists(x,P(x) & All(x,Q(x) >> ~P(x)))')
+
+
+m = expr('All(x,P(x)<=>(Q(x) & Exists(y,Q(y) & R(y,x))))')
 print to_clause_form(m, trace)
 
 ##m = expr('x <=> y')
