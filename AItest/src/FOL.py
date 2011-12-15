@@ -2,7 +2,7 @@
 import sys
 from Expr import *
 from utils import issequence, find_if
-from reportlab.graphics.widgets.markers import isSymbol
+
 
 # allowing tracing steps
 trace= True
@@ -255,7 +255,7 @@ def standardize_apart(s,dic={}):
             dic[s.args[0]]= s.args[0]
         return Expr(s.op, *[standardize_apart(a, dic) for a in s.args]) 
     
-    if is_var_symbol(s.op):
+    if is_variable(s):
         if s in dic:
             return dic[s]
         else:
@@ -487,7 +487,7 @@ def rename(exp,local_dic,global_dic):
                 global_dic.append(exp)
                 local_dic[exp]=exp
         return local_dic[exp] 
-    elif isSymbol(exp):
+    elif is_symbol(exp.op):
         # if it's not avar nut sympol predicate or function apply rename on functions
         return Expr(exp.op,*[rename(a, local_dic,global_dic) for a in exp.args])
     else :
