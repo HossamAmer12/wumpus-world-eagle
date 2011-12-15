@@ -81,18 +81,6 @@ class Expr:
         return hash(self.op) ^ hash(tuple(self.args))
 
     # See http://www.python.org/doc/current/lib/module-operator.html
-    # Not implemented: not, abs, pos, concat, contains, *item, *slice
-#    def __lt__(self, other):     return Expr('<',  self, other)
-#    def __le__(self, other):     return Expr('<=', self, other)
-#    def __ge__(self, other):     return Expr('>=', self, other)
-#    def __gt__(self, other):     return Expr('>',  self, other)
-#    def __add__(self, other):    return Expr('+',  self, other)
-#    def __sub__(self, other):    return Expr('-',  self, other)
-#    def __mul__(self, other):    return Expr('*',  self, other)    
-#    def __div__(self, other):    return Expr('/',  self, other)
-#    def __truediv__(self, other):return Expr('/',  self, other)
-#    def __pow__(self, other):    return Expr('**', self, other)
-#    def __xor__(self, other):    return Expr('^',  self, other)
     def __and__(self, other):    return Expr('&',  self, other)
     def __invert__(self):        return Expr('~',  self)
     def __lshift__(self, other): return Expr('<<', self, other)
